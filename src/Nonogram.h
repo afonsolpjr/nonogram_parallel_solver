@@ -23,4 +23,5 @@ public:
     Line &operator[](int index) { return rows[index]; }
 
     void print() const;
+    void unsetCells();
 };

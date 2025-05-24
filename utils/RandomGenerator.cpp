@@ -2,14 +2,13 @@
 #include <string>
 #include "../src/Nonogram.h"
 
-#define DEBUG 1
+// #define DEBUG 1
 
 #ifdef DEBUG
 #define DBG(x) std::cout << x << std::endl
 #else
 #define DBG(x)
 #endif
-
 
 class RandomGenerator
 {
@@ -19,15 +18,33 @@ public:
         std::vector<std::string> lines = splitLines(input);
 
         DBG("Testando string: \n" << input);
-        if(!isValidLines(lines))
+
+        if (!isValidLines(lines))
         {
             std::cerr << "Invalid grid string" << std::endl;
             exit(1);
         }
 
+        Nonogram new_nonogram(lines[0].size(), lines.size());
 
-        return Nonogram();
+        // parse lines
+        for (size_t i = 0; i < lines.size(); ++i)
+        {
+            parseLine(new_nonogram[i],lines[i]);
+            DBG("Dicas da linha " << i << ": " << new_nonogram[i].getHints().toString());
+        }
+        
+        // parse collumns
+        for (size_t i = 0; i < lines[0].size(); ++i)
+        {
+            parseLine(new_nonogram.getColumn(i));
+            DBG("Dicas da coluna " << i << ": " << new_nonogram.getColumn(i).getHints().toString());
+        }
+        
+        new_nonogram.unsetCells();
+        return new_nonogram;
     }
+
     static Nonogram random(int rows, int cols)
     {
         std::string grid = generateRandomGridString(rows, cols);
@@ -35,12 +52,13 @@ public:
         return nonogram;
     }
 
-    static void printRandomString(int rows, int cols){
+    static void printRandomString(int rows, int cols)
+    {
         std::string grid = generateRandomGridString(rows, cols);
         std::cout << grid;
     }
-private: // metodos auxiliares
 
+private: // metodos auxiliares
     // Função auxiliar para gerar uma string de grid aleatória com 0s e 1s
     static std::string generateRandomGridString(int rows, int cols)
     {
@@ -99,5 +117,56 @@ private: // metodos auxiliares
         }
         return true;
     }
-    
+
+    // Parser da string de uma linha somente
+    static void parseLine(Line &line, std::string &linestr)
+    {  
+        int sequence = 0;
+  
+        for (size_t i = 0; i < line.getLength(); i++)
+        {
+            if (linestr[i] == '1')
+            {
+                line[i].set();
+                sequence++;
+            }
+            else
+            {
+                if (sequence > 0)
+                {
+                    line.addHint(sequence);
+                    sequence = 0;
+                }
+            }
+        }
+        if (sequence > 0)
+            line.addHint(sequence);
+        if (!line.getHintSize())
+            line.addHint(0);
+    }
+
+    // Parser de uma Line já inicializada
+    static void parseLine(Line &line)
+    {
+        // gerar dicas
+        int sequence = 0;
+        for (int i = 0; i < line.getLength(); ++i)
+        {
+            if (line[i].isSet())
+                sequence++;
+            else
+            {
+                if (sequence > 0)
+                {
+                    line.addHint(sequence);
+                    sequence = 0;
+                }
+            }
+        }
+        if (sequence > 0)
+            line.addHint(sequence);
+        if (!line.getHintSize())
+            line.addHint(0);
+    }
+
 };

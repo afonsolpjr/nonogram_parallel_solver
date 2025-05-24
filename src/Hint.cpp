@@ -27,3 +27,14 @@ int Hint::getHint(int index) const {
     }
     return blocks[index];
 }
+
+std::string Hint::toString() const {
+    std::string result;
+    for (size_t i = 0; i < blocks.size(); ++i) {
+        result += std::to_string(blocks[i]);
+        if (i < blocks.size() - 1) {
+            result += " ";
+        }
+    }
+    return result;
+}
