@@ -14,6 +14,7 @@ public:
     void addCell(const Cell& cell);
     void print() const;
     int getHint(int index) const;
+    std::string toString(bool zeros = false) const;
 
     //definindo operador de indexacao
     Cell& operator[](int index) { return cells[index]; }

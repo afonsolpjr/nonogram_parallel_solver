@@ -30,12 +30,20 @@ void Line::addCell(const Cell& cell)
         cells.push_back(cell);
 }
 
+/// @brief returns the string representation of the line.
+/// @return 
+std::string Line::toString(bool zeros = false) const
+{
+    std::string result;
+    for (const auto &cell : cells)
+        result += (cell.isSet() ? (zeros? '1': '*') : (zeros? '0': '.'));
+    return result;
+} 
+
 /// @brief  Prints the line to the console.
 void Line::print() const
 {
-    for (const auto &cell : cells)
-        std::cout << (cell.isSet() ? '1' : '0');
-    std::cout << std::endl;
+    std::cout << this->toString() + '\n' << std::endl;
 }
 
 /// @brief  Returns the hint at the specified index.
