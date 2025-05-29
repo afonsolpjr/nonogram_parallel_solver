@@ -23,6 +23,14 @@ void Line::setCell(int index)
         cells[index]->set();
 }
 
+void Line::blockCell(int index)
+{
+    if(index >= 0 && index < length)
+        cells[index]->setBlocked();
+
+    
+}
+
 /// @brief  Adds a cell to the line.
 /// @param cell
 void Line::addCell(Cell* cell)

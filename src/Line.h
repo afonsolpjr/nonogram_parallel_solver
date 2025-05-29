@@ -11,7 +11,9 @@ private:
     Hint hints;
 public:
     Line(int length, bool init);
+
     void setCell(int index);
+    void blockCell(int index);
     void addCell(Cell* cell);
     void bindCell(int index, Cell* cell);
     void print() const;
