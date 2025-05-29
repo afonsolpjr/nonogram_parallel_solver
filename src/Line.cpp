@@ -37,7 +37,7 @@ std::string Line::toString(bool zeros) const
 {
     std::string result;
     for ( const auto cell : cells)
-        result += (cell->isSet() ? (zeros? "1 ": "* ") : (zeros? "0 ": ". "));
+        result += cell->toString() + ' ';
     return result;
 } 
 

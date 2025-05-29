@@ -1,3 +1,4 @@
+#pragma once
 #include "Line.h"
 
 class Nonogram

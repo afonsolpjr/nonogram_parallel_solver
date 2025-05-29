@@ -1,5 +1,6 @@
 #include <iostream>
 #include "../utils/RandomGenerator.cpp"
+#include "../utils/CombinationGenerator.cpp"
 int main() {
 
     int lenght;
@@ -13,6 +14,10 @@ int main() {
     Nonogram nonogram = RandomGenerator::random(lenght,lenght);
     
     nonogram.print();
+
+    // testando gerador de combinacoes
+
+    CombinationGenerator::main();
 
     return 0;
 }
