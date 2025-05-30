@@ -10,7 +10,7 @@ private:
     int length;
     Hint hints;
 public:
-    Line(int length, bool init);
+    Line(int length, bool init = false);
 
     void setCell(int index);
     void blockCell(int index);
@@ -19,7 +19,7 @@ public:
     void print() const;
     void addHint(int block_size) { hints.addBlock(block_size); }
     int getHint(int index) const;
-    Hint getHints() const { return hints; }
+    const Hint& getHints()  { return hints; }
     int getHintSize() const { return hints.getSize(); }
     int getLength() const { return length; }
     std::string toString(bool zeros = false) const;

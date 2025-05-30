@@ -1,36 +1,45 @@
-#pragma once
-
 #include <vector>
-#include <../src/Nonogram.h>
-#include "CombinationGenerator.cpp"
+#include <list>
+#include "../src/Nonogram.h"
+#include <iostream>
+
 
 class LineSolver
 {
 
 public:
-    std::vector<std::vector<int>> possibilities;
-    Line* line;
+    std::list<std::vector<int>> possibilities;
+    Line *line;
 
-    LineSolver(Line& line_ref) : line(&line_ref) 
+    LineSolver(Line &line_ref) : line(&line_ref)
     {
         int total_blocks = 0;
-        for (int block_size : line->getHints().getBlocks())
+        for ( int block_size : line->getHints().getBlocks())
+        {
             total_blocks += block_size;
-        this->possibilities = generate_possibilities(*line,line->getLength());
+        }
+        printf(" length = %d | total_blocks = %d\n"
+            ,line->getLength(),total_blocks);
+        int slack = line->getLength() - (total_blocks + line->getHintSize() - 1);
+        this->possibilities = generate_possibilities(*line, slack);
     }
 
-    void checkCommonalities(){
-        for(int i = 0; i < line->getLength(); i++)
+    /* Checks for cell commonalities in the possibilities */
+    void checkCommonalities()
+    {
+        for (int i = 0; i < line->getLength(); i++)
         {
             bool common = true;
-            int common_value = possibilities[0][i];
-            for(const auto& possibility: possibilities){
-                if(possibility[i] != common_value)
+            int common_value = possibilities.front()[i];
+            for (const auto &possibility : possibilities)
+            {
+                if (possibility[i] != common_value)
                     common = false;
             }
-            if(common)
+            if (common)
             {
-                switch(common_value){
+                switch (common_value)
+                {
                 case 0:
                     this->line->blockCell(i);
                     break;
@@ -40,21 +49,45 @@ public:
                     break;
                 }
                 break;
+
             }
 
-            // eliminate possibilities on column/row
+            // Na coluna i, todos os 
         }
     }
-private:
-    std::vector<std::vector<int>> static generate_possibilities(Line line, int slack)
-    {
-        std::vector<std::vector<int>> combinations;
-        int block_size = line.getHint(0);
 
+    void main()
+    {
+        for (const auto &possibility : possibilities)
+        {
+            for (int cell : possibility)
+            {
+                std::cout << cell << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+private:
+    /**
+     * @brief Generate all possibilities based on the "slack" number of a line.(number of free empty spaces)
+     * Slack is understood as the (sum of blocks length) +  (number of blocks - 1)
+     * @param line
+     * @param slack
+     * @return
+     */
+    std::list<std::vector<int>> static generate_possibilities(Line line, int slack)
+    {
+        std::list<std::vector<int>> combinations;
+        int block_size = line.getHint(0);
         // funcao recursiva, caso base são aqueles onde só tem um bloco a ser construido
         if (line.getHintSize() == 1)
         {
+            
             int length = line.getLength();
+            printf("tentando construir linha unica de tam = %d, length = %d, slack = %d\n"
+                ,block_size,length,slack);
+            
             for (int start = 0; start <= slack; start++)
                 combinations.push_back(composeBlockLine(length, block_size, start));
             return combinations;
@@ -64,7 +97,7 @@ private:
             // caso geral, onde cada "uso" de uma folga gera novas combinações restantes
             for (int start = 0; start <= slack; start++)
             {
-                std::vector<std::vector<int>> slack_combinations;
+                std::list<std::vector<int>> slack_combinations;
 
                 int base_size = start + block_size + 1;
                 std::vector<int> base_combination = composeBlockLine(base_size, block_size, start);
@@ -75,7 +108,7 @@ private:
                 for (int j = 1; j < line.getHintSize(); ++j)
                     remaining_line.addHint(line.getHint(j));
 
-                std::vector<std::vector<int>> remaining_combinations = CombinationGenerator::generate(remaining_line, slack - start);
+                std::list<std::vector<int>> remaining_combinations = LineSolver::generate_possibilities(remaining_line, slack - start);
 
                 // combina as combinações base com as combinações restantes
                 for (const auto &remaining_combination : remaining_combinations)
@@ -92,6 +125,13 @@ private:
         return combinations;
     }
 
+    /**
+     * @brief Generate a "line" with 'block_size' contiguous 1's, beginning at position 'start'
+     * @param length length of the line
+     * @param block_size length of contiguous 1's
+     * @param start position to start the block
+     * @return
+     */
     std::vector<int> static composeBlockLine(int length, int block_size, int start)
     {
         std::vector<int> combination(length, 0);
@@ -102,6 +142,32 @@ private:
                 combination[i] = 1; // Set the cell to 1 (filled)
             }
         }
+        // for (int cell : combination)
+        // {
+        //     {
+        //         std::cout << cell << " ";
+        //     }
+        //     std::cout << std::endl;
+        // }
         return combination;
+    }
+
+    /**
+     * @brief Eliminate possibilities with 'status' value on the indexed cell.
+     * @param index Index of the block to check values in possibilities
+     * @param status recently changed status of the cell
+     */
+    void eliminatePossibilities(int index, int status)
+    {
+
+        /* manage possibilities
+            this would be a critical section on a concurrent program */
+        for (auto it = possibilities.begin(); it != possibilities.end();)
+        {
+            if ((*it)[index] != status)
+                it = possibilities.erase(it); // erase retorna o próximo elemento válido
+            else
+                ++it;
+        }
     }
 };

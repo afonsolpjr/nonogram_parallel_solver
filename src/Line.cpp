@@ -1,7 +1,7 @@
 #include "Line.h"
 #include <iostream>
 
-Line::Line(int length, bool init=false){
+Line::Line(int length, bool init){
     this->length = length;
     this->hints = Hint();
     if (init) {
