@@ -1,6 +1,6 @@
 #include <iostream>
 #include "../utils/RandomGenerator.cpp"
-#include "../utils/LineSolver.cpp"
+#include "../utils/NonogramSolver.cpp"
 #include "../utils/CombinationGenerator.cpp"
 
 int main() {
@@ -17,12 +17,9 @@ int main() {
     
     nonogram.print();
 
-    // testando gerador de combinacoes
-    Line linha(15);
-    linha.addHint(10);
-    std::cout << "Linha pro solver criada" << std::endl;
-    LineSolver solver(linha);
-    solver.main();
+    NonogramSolver solver(nonogram);
+
+    solver.solve();
 
     return 0;
 }

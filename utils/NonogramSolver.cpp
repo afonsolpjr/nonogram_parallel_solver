@@ -5,14 +5,65 @@ class NonogramSolver
 {
 public:
     Nonogram *nonogram;
-    std::vector<LineSolver *> row_solvers;
-    std::vector<LineSolver *> column_solvers;
+    std::vector<LineSolver *> rowSolvers;
+    std::vector<LineSolver *> columnSolvers;
     NonogramSolver(Nonogram &nonogram_ref) : nonogram(&nonogram_ref)
     {
         for (int i = 0; i < nonogram->getHeight(); i++)
-            row_solvers.push_back(new LineSolver(nonogram->getRow(i)));
+            rowSolvers.push_back(new LineSolver(nonogram->getRow(i)));
 
         for (int i = 0; i < nonogram->getWidth(); i++)
-            column_solvers.push_back(new LineSolver(nonogram->getColumn(i)));    
+            columnSolvers.push_back(new LineSolver(nonogram->getColumn(i)));
+    }
+
+    void main()
+    {
+        for (const auto &solver : rowSolvers)
+            solver->print_possibilities();
+    }
+
+    void solve()
+    {
+        while (!isSolved())
+        {
+
+            for (int i = 0; i < rowSolvers.size(); i++)
+            {
+                if (rowSolvers[i]->isSolved())
+                    continue;
+
+                rowSolvers[i]->updatePossibilities();
+                std::list<Update> columnUpdates;
+                columnUpdates = rowSolvers[i]->resolveCommonPatterns();
+                // At first, the index value on updates indicate the column.
+                //  But it must indicate the index on the column.
+                for (const auto &update : columnUpdates)
+                    columnSolvers[update.index]->insertUpdate({i, update.value});
+            }
+
+            for (int i = 0; i < columnSolvers.size(); i++)
+            {
+                if (columnSolvers[i]->isSolved())
+                    continue;
+
+                columnSolvers[i]->updatePossibilities();
+                std::list<Update> rowUpdates;
+                rowUpdates = columnSolvers[i]->resolveCommonPatterns();
+                // At first, the index value on updates indicate the row.
+                //  But it must indicate the index on the row.
+                for (const auto &update : rowUpdates)
+                    rowSolvers[update.index]->insertUpdate({i, update.value});
+            }
+            nonogram->print();
+        }
+    }
+
+    bool isSolved()
+    {
+        for (const auto &solver : rowSolvers)
+            if (!solver->isSolved())
+                return false;
+
+        return true;
     }
 };

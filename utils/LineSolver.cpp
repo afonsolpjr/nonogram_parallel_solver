@@ -3,32 +3,43 @@
 #include "../src/Nonogram.h"
 #include <iostream>
 
-
+struct Update
+{
+    int index, value;
+};
 class LineSolver
 {
 
 public:
-    std::list<std::vector<int>> possibilities;
     Line *line;
 
-    LineSolver(Line &line_ref) : line(&line_ref)
+    std::list<std::vector<int>> possibilities;
+
+    std::list<Update> updates;
+
+    int cells_solved;
+
+    LineSolver(Line &line_ref) : line(&line_ref), cells_solved(0)
     {
         int total_blocks = 0;
-        for ( int block_size : line->getHints().getBlocks())
+        for (int block_size : line->getHints().getBlocks())
         {
             total_blocks += block_size;
         }
-        printf(" length = %d | total_blocks = %d\n"
-            ,line->getLength(),total_blocks);
         int slack = line->getLength() - (total_blocks + line->getHintSize() - 1);
         this->possibilities = generate_possibilities(*line, slack);
     }
 
-    /* Checks for cell commonalities in the possibilities */
-    void checkCommonalities()
+    /// @brief Check for communalities on the lines possibilities, and resolve them, marking the cell as the common value found.
+    /// @return List of updates(possibility exclusions) to do on a row/column.
+    std::list<Update> resolveCommonPatterns()
     {
+        std::list<Update> result;
         for (int i = 0; i < line->getLength(); i++)
         {
+            if (!(*line)[i].isEmpty())
+                continue;
+
             bool common = true;
             int common_value = possibilities.front()[i];
             for (const auto &possibility : possibilities)
@@ -38,21 +49,22 @@ public:
             }
             if (common)
             {
-                switch (common_value)
-                {
-                case 0:
-                    this->line->blockCell(i);
-                    break;
-
-                case 1:
-                    this->line->setCell(i);
-                    break;
-                }
-                break;
-
+                play(i, common_value);
+                result.push_back({i, common_value});
             }
+        }
 
-            // Na coluna i, todos os 
+        return result;
+    }
+
+    /// @brief Conform the possibilities with each update made in the updates list.
+    void updatePossibilities()
+    {
+        // Each update data has the cell and value to filter on all possibilities.
+        for (auto update = updates.begin(); update != updates.end();)
+        {
+            eliminatePossibilities(update->index, update->value);
+            update = updates.erase(update);
         }
     }
 
@@ -66,6 +78,34 @@ public:
             }
             std::cout << std::endl;
         }
+    }
+
+    /* Print a possibility */
+    void print_possibility(const std::vector<int> &possibility)
+    {
+        for (int cell : possibility)
+        {
+            std::cout << cell << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    // Print all possibilities
+    void print_possibilities()
+    {
+        for (const auto &possibility : possibilities)
+            print_possibility(possibility);
+    }
+
+    void insertUpdate(Update update)
+    {
+        cells_solved++;
+        updates.push_back(update);
+    }
+
+    bool isSolved()
+    {
+        return cells_solved == line->getLength();
     }
 
 private:
@@ -83,11 +123,10 @@ private:
         // funcao recursiva, caso base são aqueles onde só tem um bloco a ser construido
         if (line.getHintSize() == 1)
         {
-            
+
             int length = line.getLength();
-            printf("tentando construir linha unica de tam = %d, length = %d, slack = %d\n"
-                ,block_size,length,slack);
-            
+            // printf("tentando construir linha unica de tam = %d, length = %d, slack = %d\n", block_size, length, slack);
+
             for (int start = 0; start <= slack; start++)
                 combinations.push_back(composeBlockLine(length, block_size, start));
             return combinations;
@@ -142,13 +181,7 @@ private:
                 combination[i] = 1; // Set the cell to 1 (filled)
             }
         }
-        // for (int cell : combination)
-        // {
-        //     {
-        //         std::cout << cell << " ";
-        //     }
-        //     std::cout << std::endl;
-        // }
+
         return combination;
     }
 
@@ -169,5 +202,23 @@ private:
             else
                 ++it;
         }
+    }
+
+    /// @brief Make a move on the game. That is, paint a block or mark it as blocked(empty with no chances of painting)
+    /// @param index index of the cell on the line
+    /// @param block_value status of the cell
+    void play(int index, int cell_value)
+    {
+        switch (cell_value)
+        {
+        case 0:
+            this->line->blockCell(index);
+            break;
+
+        case 1:
+            this->line->setCell(index);
+            break;
+        }
+        cells_solved++;
     }
 };
