@@ -26,7 +26,7 @@ public:
     {
         while (!isSolved())
         {
-
+            int changesMade = 0;
             for (int i = 0; i < rowSolvers.size(); i++)
             {
                 if (rowSolvers[i]->isSolved())
@@ -35,6 +35,7 @@ public:
                 rowSolvers[i]->updatePossibilities();
                 std::list<Update> columnUpdates;
                 columnUpdates = rowSolvers[i]->resolveCommonPatterns();
+                changesMade += columnUpdates.size();
                 // At first, the index value on updates indicate the column.
                 //  But it must indicate the index on the column.
                 for (const auto &update : columnUpdates)
@@ -49,12 +50,20 @@ public:
                 columnSolvers[i]->updatePossibilities();
                 std::list<Update> rowUpdates;
                 rowUpdates = columnSolvers[i]->resolveCommonPatterns();
+                changesMade += rowUpdates.size();
                 // At first, the index value on updates indicate the row.
                 //  But it must indicate the index on the row.
                 for (const auto &update : rowUpdates)
                     rowSolvers[update.index]->insertUpdate({i, update.value});
             }
-            nonogram->print();
+
+            if (!changesMade)
+            {
+                printf("Acho que não tem solução ein\n");
+                return;
+            }
+            else
+                nonogram->print();
         }
     }
 
