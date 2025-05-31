@@ -1,24 +1,30 @@
 #include <iostream>
-#include "../utils/RandomGenerator.h"
-#include "../utils/NonogramSolver.h"
+#include "../utils/NonogramRun.h"
+#include "../utils/ParallelNonogramSolver.h"
 
-int main() {
+#include <chrono>
 
-    int lenght;
+
+void executeGame(int game_number)
+{
+    std::vector<RawPuzzleData> gamesData = NonogramPuzzleFactory::loadGamesFromFile("variooos.txt");
+
+    NonogramRun execution(gamesData[21]);
+    execution.run();
+    execution.printStats();
+    execution.puzzle.print();
+}
+
+void test_conc(){
+    ParallelNonogramSolver::test(4);
+}
+
+int main()
+{
+    using namespace std::chrono;
 
     std::cout << "Hello, Nonogram Solver!" << std::endl;
-    //seeding rng 
-    std::srand(static_cast<unsigned int>(time(0))); 
 
-    std::cout << "Insira a dimensao do jogo quadrado:" << std::endl;
-    std::cin >> lenght;
-    Nonogram nonogram = RandomGenerator::randomFromBool(lenght,lenght);
-    
-    nonogram.print();
-
-    NonogramSolver solver(nonogram);
-
-    // solver.solve();
-
+    test_conc();
     return 0;
 }

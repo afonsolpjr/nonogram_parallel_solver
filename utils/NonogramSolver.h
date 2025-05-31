@@ -15,6 +15,6 @@ public:
     NonogramSolver(Nonogram &nonogram_ref);
 
     void main();
-    void solve();
+    bool solve();
     bool isSolved();
 };

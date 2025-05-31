@@ -22,6 +22,7 @@ public:
     int getWidth() const { return width; }
     int getHeight() const { return height; }
     Line &operator[](int index) { return rows[index]; }
+    const Line &operator[](int index) const { return rows[index]; }
 
     void print() const;
     void unsetCells();

@@ -2,6 +2,7 @@
 #include "NonogramSolver.h"
 #include <vector>
 
+
 NonogramSolver::NonogramSolver(Nonogram &nonogram_ref) : nonogram(&nonogram_ref)
 {
     for (int i = 0; i < nonogram->getHeight(); i++)
@@ -17,7 +18,7 @@ void NonogramSolver::main()
         solver->print_possibilities();
 }
 
-void NonogramSolver::solve()
+bool NonogramSolver::solve()
 {
     while (!isSolved())
     {
@@ -53,13 +54,9 @@ void NonogramSolver::solve()
         }
 
         if (!changesMade)
-        {
-            printf("Acho que não tem solução ein\n");
-            return;
-        }
-        else
-            nonogram->print();
+            return false;
     }
+    return true;
 }
 
 bool NonogramSolver::isSolved()

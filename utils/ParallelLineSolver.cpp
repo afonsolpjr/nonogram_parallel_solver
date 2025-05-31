@@ -1,7 +1,10 @@
-#include "LineSolver.h"
+#include "ParallelLineSolver.h"
 #include <iostream>
 
-LineSolver::LineSolver(Line &line_ref) : line(&line_ref), cells_solved(0)
+ParallelLineSolver::ParallelLineSolver(Line &line_ref) : line(&line_ref), cells_solved(0)
+{    }
+
+void ParallelLineSolver::init()
 {
     int total_blocks = 0;
     for (int block_size : line->getHints().getBlocks())
@@ -11,10 +14,9 @@ LineSolver::LineSolver(Line &line_ref) : line(&line_ref), cells_solved(0)
     int slack = line->getLength() - (total_blocks + line->getHintSize() - 1);
     this->possibilities = generatePossibilities(*line, slack);
 }
-
-std::list<Update> LineSolver::resolveCommonPatterns()
+std::stack<Update> ParallelLineSolver::resolveCommonPatterns()
 {
-    std::list<Update> result;
+    std::stack<Update> result;
     for (int i = 0; i < line->getLength(); i++)
     {
         if (!(*line)[i].isEmpty())
@@ -30,13 +32,13 @@ std::list<Update> LineSolver::resolveCommonPatterns()
         if (common)
         {
             play(i, common_value);
-            result.push_back({i, common_value});
+            result.push({i, common_value});
         }
     }
     return result;
 }
 
-void LineSolver::updatePossibilities()
+void ParallelLineSolver::updatePossibilities()
 {
     for (auto update = updates.begin(); update != updates.end();)
     {
@@ -45,7 +47,7 @@ void LineSolver::updatePossibilities()
     }
 }
 
-void LineSolver::main()
+void ParallelLineSolver::main()
 {
     for (const auto &possibility : possibilities)
     {
@@ -57,7 +59,7 @@ void LineSolver::main()
     }
 }
 
-void LineSolver::print_possibility(const std::vector<int> &possibility)
+void ParallelLineSolver::print_possibility(const std::vector<int> &possibility)
 {
     for (int cell : possibility)
     {
@@ -66,24 +68,26 @@ void LineSolver::print_possibility(const std::vector<int> &possibility)
     std::cout << std::endl;
 }
 
-void LineSolver::print_possibilities()
+void ParallelLineSolver::print_possibilities()
 {
     for (const auto &possibility : possibilities)
         print_possibility(possibility);
 }
 
-void LineSolver::insertUpdate(Update update)
+void ParallelLineSolver::insertUpdate(Update update)
 {
+    std::lock_guard<std::mutex> lock(mutex);
+
     cells_solved++;
     updates.push_back(update);
 }
 
-bool LineSolver::isSolved()
+bool ParallelLineSolver::isSolved()
 {
     return cells_solved == line->getLength();
 }
 
-std::list<std::vector<int>> LineSolver::generatePossibilities(const Line& line, int slack)
+std::list<std::vector<int>> ParallelLineSolver::generatePossibilities(const Line& line, int slack)
 {
     std::list<std::vector<int>> combinations;
     int block_size = line.getHint(0);
@@ -108,7 +112,7 @@ std::list<std::vector<int>> LineSolver::generatePossibilities(const Line& line, 
             for (int j = 1; j < line.getHintSize(); ++j)
                 remaining_line.addHint(line.getHint(j));
 
-            std::list<std::vector<int>> remaining_combinations = LineSolver::generatePossibilities(remaining_line, slack - start);
+            std::list<std::vector<int>> remaining_combinations = ParallelLineSolver::generatePossibilities(remaining_line, slack - start);
 
             for (const auto &remaining_combination : remaining_combinations)
             {
@@ -123,7 +127,7 @@ std::list<std::vector<int>> LineSolver::generatePossibilities(const Line& line, 
     return combinations;
 }
 
-std::vector<int> LineSolver::composeBlockLine(int length, int block_size, int start)
+std::vector<int> ParallelLineSolver::composeBlockLine(int length, int block_size, int start)
 {
     std::vector<int> combination(length, 0);
     for (int i = start; i < start + block_size; ++i)
@@ -136,7 +140,7 @@ std::vector<int> LineSolver::composeBlockLine(int length, int block_size, int st
     return combination;
 }
 
-void LineSolver::eliminatePossibilities(int index, int status)
+void ParallelLineSolver::eliminatePossibilities(int index, int status)
 {
     for (auto it = possibilities.begin(); it != possibilities.end();)
     {
@@ -147,7 +151,7 @@ void LineSolver::eliminatePossibilities(int index, int status)
     }
 }
 
-void LineSolver::play(int index, int cell_value)
+void ParallelLineSolver::play(int index, int cell_value)
 {
     switch (cell_value)
     {

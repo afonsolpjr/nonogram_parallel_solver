@@ -2,31 +2,35 @@
 
 #include <vector>
 #include <list>
+#include <stack>
 #include <iostream>
+#include <mutex>
 #include "../src/Nonogram.h"
 
-struct Update
-{
-    int index, value;
-};
-
-class LineSolver
+struct UpdateJob{
+    int line_index,element_index;
+    bool value;
+}
+class ParallelLineSolver
 {
 public:
     Line *line;
     std::list<std::vector<int>> possibilities;
-    std::list<Update> updates;
+    std::stack<UpdateJob> updates;
     int cells_solved;
+    std::mutex mutex;
 
-    LineSolver(Line &line_ref);
+    ParallelLineSolver(Line &line_ref);
 
-    std::list<Update> resolveCommonPatterns();
+    void init();
+    std::stack<UpdateJob> resolveCommonPatterns();
     void updatePossibilities();
     void main();
     void print_possibility(const std::vector<int> &possibility);
     void print_possibilities();
-    void insertUpdate(Update update);
+    void insertUpdateJob(UpdateJob update);
     bool isSolved();
+
 
 private:
     static std::list<std::vector<int>> generatePossibilities(const Line& line, int slack);

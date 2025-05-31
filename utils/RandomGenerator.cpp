@@ -91,6 +91,7 @@ void RandomGenerator::printRandomString(int rows, int cols)
 std::string RandomGenerator::generateRandomStringGrid(int rows, int cols)
 {
     std::string grid;
+
     for (int i = 0; i < rows; ++i)
     {
         for (int j = 0; j < cols; ++j)
@@ -105,10 +106,11 @@ std::string RandomGenerator::generateRandomStringGrid(int rows, int cols)
 std::vector<bool> RandomGenerator::generateRandomBoolGrid(int rows, int cols)
 {
     std::vector<bool> grid;
+
     grid.reserve(rows * cols);
     for (int i = 0; i < rows * cols; ++i)
     {
-        grid.push_back((rand() % 2) ? true : false);
+        grid.push_back((rand() % 10 < 6) ? true : false);
     }
     return grid;
 }
