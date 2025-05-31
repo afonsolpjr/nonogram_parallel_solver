@@ -9,14 +9,10 @@ void executeGame(int game_number)
 {
     std::vector<RawPuzzleData> gamesData = NonogramPuzzleFactory::loadGamesFromFile("variooos.txt");
 
-    NonogramRun execution(gamesData[21]);
+    NonogramRun execution(gamesData[game_number]);
     execution.run();
     execution.printStats();
     execution.puzzle.print();
-}
-
-void test_conc(){
-    ParallelNonogramSolver::test(4);
 }
 
 int main()
@@ -25,6 +21,6 @@ int main()
 
     std::cout << "Hello, Nonogram Solver!" << std::endl;
 
-    test_conc();
+    executeGame(106);
     return 0;
 }

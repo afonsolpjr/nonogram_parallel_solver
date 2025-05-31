@@ -2,14 +2,13 @@
 #include "NonogramSolver.h"
 #include <vector>
 
-
 NonogramSolver::NonogramSolver(Nonogram &nonogram_ref) : nonogram(&nonogram_ref)
 {
     for (int i = 0; i < nonogram->getHeight(); i++)
-        rowSolvers.push_back(new LineSolver(nonogram->getRow(i)));
+        rowSolvers.push_back(new SequentialLineSolver(nonogram->getRow(i)));
 
     for (int i = 0; i < nonogram->getWidth(); i++)
-        columnSolvers.push_back(new LineSolver(nonogram->getColumn(i)));
+        columnSolvers.push_back(new SequentialLineSolver(nonogram->getColumn(i)));
 }
 
 void NonogramSolver::main()
@@ -23,19 +22,25 @@ bool NonogramSolver::solve()
     while (!isSolved())
     {
         int changesMade = 0;
+        std::stack<Update> rowUpdates;
+        std::stack<Update> columnUpdates;
+
         for (int i = 0; i < rowSolvers.size(); i++)
         {
             if (rowSolvers[i]->isSolved())
                 continue;
 
             rowSolvers[i]->updatePossibilities();
-            std::list<Update> columnUpdates;
             columnUpdates = rowSolvers[i]->resolveCommonPatterns();
             changesMade += columnUpdates.size();
             // At first, the index value on updates indicate the column.
             //  But it must indicate the index on the column.
-            for (const auto &update : columnUpdates)
+            while (!columnUpdates.empty())
+            {
+                auto update = columnUpdates.top();
                 columnSolvers[update.index]->insertUpdate({i, update.value});
+                columnUpdates.pop();
+            }
         }
 
         for (int i = 0; i < columnSolvers.size(); i++)
@@ -44,13 +49,16 @@ bool NonogramSolver::solve()
                 continue;
 
             columnSolvers[i]->updatePossibilities();
-            std::list<Update> rowUpdates;
             rowUpdates = columnSolvers[i]->resolveCommonPatterns();
             changesMade += rowUpdates.size();
             // At first, the index value on updates indicate the row.
             //  But it must indicate the index on the row.
-            for (const auto &update : rowUpdates)
+            while (!rowUpdates.empty())
+            {
+                auto update = rowUpdates.top();
                 rowSolvers[update.index]->insertUpdate({i, update.value});
+                rowUpdates.pop();
+            }
         }
 
         if (!changesMade)

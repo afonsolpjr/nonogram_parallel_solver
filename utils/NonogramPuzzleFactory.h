@@ -1,5 +1,5 @@
+#pragma once
 #include "RandomGenerator.h"
-#include "NonogramSolver.h"
 #include <vector>
 
 struct RawPuzzleData

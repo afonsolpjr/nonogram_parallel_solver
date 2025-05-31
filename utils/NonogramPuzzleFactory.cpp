@@ -1,6 +1,30 @@
+#include "NonogramPuzzleFactory.h"
 #include "NonogramRun.h"
 #include <fstream>
 #include <sstream>
+
+std::vector<RawPuzzleData> NonogramPuzzleFactory::loadGamesFromFile(const std::string &filename)
+{
+    std::vector<RawPuzzleData> games;
+    std::ifstream in(filename);
+    std::string line;
+
+    while (std::getline(in, line))
+    {
+        std::istringstream iss(line);
+        int dimension;
+        std::string gridstr;
+
+        if (!(iss >> dimension >> gridstr))
+            continue;
+
+        std::vector<bool> grid;
+        for (char c : gridstr)
+            grid.push_back(c == '1');
+        games.push_back({dimension, grid});
+    }
+    return games;
+}
 
 void NonogramPuzzleFactory::create_games(const std::vector<int> dimensions, int num_games, const std::string filename)
 {
@@ -22,7 +46,7 @@ void NonogramPuzzleFactory::create_games(const std::vector<int> dimensions, int 
             std::vector<bool> grid = getDifferentGrid(grids, dimension);
             Nonogram puzzle = RandomGenerator::fromBool(grid, dimension);
             NonogramSolver solver(puzzle);
-            if (solver.solve() && NonogramRun::verifyCorrectness({dimension,grid},puzzle))
+            if (solver.solve() && NonogramRun::verifyCorrectness({dimension, grid}, puzzle))
             {
                 grids.push_back(grid);
                 printf("\r %ld\\%d jogos de tamanho %d gerados", grids.size(), num_games, dimension);
@@ -86,29 +110,6 @@ void NonogramPuzzleFactory::writeGridToFile(const std::vector<bool> &grid, int d
         fputc(b ? '1' : '0', out);
     fputc('\n', out);
     fclose(out);
-}
-
-std::vector<RawPuzzleData> NonogramPuzzleFactory::loadGamesFromFile(const std::string &filename)
-{
-    std::vector<RawPuzzleData> games;
-    std::ifstream in(filename);
-    std::string line;
-
-    while (std::getline(in, line))
-    {
-        std::istringstream iss(line);
-        int dimension;
-        std::string gridstr;
-
-        if (!(iss >> dimension >> gridstr))
-            continue;
-
-        std::vector<bool> grid;
-        for (char c : gridstr)
-            grid.push_back(c == '1');
-        games.push_back({dimension, grid});
-    }
-    return games;
 }
 
 void NonogramPuzzleFactory::loadGames(std::string filename)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ParallelLineSolver.h"
+#include "linesolvers/ParallelLineSolver.h"
 #include "../src/Nonogram.h"
 #include <vector>
 #include <unordered_set>
@@ -23,7 +23,6 @@ public:
     int rowsSize() { return rowSolvers.size(); };
 
     void worker();
-    void static test(int nThreads);
 
 private:
     std::unordered_set<int> rowsJobs,

@@ -12,16 +12,6 @@ ParallelNonogramSolver::ParallelNonogramSolver(Nonogram &nonogram_ref, int nThre
         columnSolvers.push_back(new ParallelLineSolver(nonogram->getColumn(i)));
 }
 
-void ParallelNonogramSolver::test(int nThreads)
-{
-    std::vector<std::thread> thread_pool;
-
-    for (size_t i = 0; i < nThreads; i++)
-    {
-        thread_pool.push_back(std::thread(worker, i));
-    }
-}
-
 bool ParallelNonogramSolver::solve()
 {
     std::vector<std::thread> thread_pool;

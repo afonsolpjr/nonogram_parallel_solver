@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LineSolver.h"
+#include "linesolvers/SequentialLineSolver.h"
 #include "../src/Nonogram.h"
 #include <vector>
 #include <list>
@@ -9,8 +9,8 @@ class NonogramSolver
 {
 public:
     Nonogram *nonogram;
-    std::vector<LineSolver *> rowSolvers;
-    std::vector<LineSolver *> columnSolvers;
+    std::vector<SequentialLineSolver *> rowSolvers;
+    std::vector<SequentialLineSolver *> columnSolvers;
 
     NonogramSolver(Nonogram &nonogram_ref);
 
