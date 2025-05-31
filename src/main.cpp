@@ -1,7 +1,6 @@
 #include <iostream>
-#include "../utils/RandomGenerator.cpp"
-#include "../utils/NonogramSolver.cpp"
-#include "../utils/CombinationGenerator.cpp"
+#include "../utils/RandomGenerator.h"
+#include "../utils/NonogramSolver.h"
 
 int main() {
 
@@ -13,13 +12,13 @@ int main() {
 
     std::cout << "Insira a dimensao do jogo quadrado:" << std::endl;
     std::cin >> lenght;
-    Nonogram nonogram = RandomGenerator::random(lenght,lenght);
+    Nonogram nonogram = RandomGenerator::randomFromBool(lenght,lenght);
     
     nonogram.print();
 
     NonogramSolver solver(nonogram);
 
-    solver.solve();
+    // solver.solve();
 
     return 0;
 }

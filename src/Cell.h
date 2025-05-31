@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 
-
-class Cell {
+class Cell
+{
 private:
     int state = 0;
 
@@ -17,9 +17,23 @@ public:
     bool isEmpty() const { return state == 0; }
     bool isBlocked() const { return state == -1; }
 
-    std::string toString(bool zeros = false) {
-        if(isSet()) return (zeros? "1" : "#");
-        else return (zeros? "0" : ".");
+    std::string toString(bool zeros = false)
+    {
+
+        switch (state)
+        {
+        case -1:
+            return zeros ? "0" : "-";
+            break;
+        case 0:
+            return zeros ? "0" : ".";
+            break;
+        case 1:
+            return zeros ? "1" : "#";
+            break;
+        }
+
+        return "erro";
     }
 
     int getState() const { return state; }

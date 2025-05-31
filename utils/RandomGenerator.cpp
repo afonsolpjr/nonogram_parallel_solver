@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../src/Nonogram.h"
+#include "RandomGenerator.h"
 
 // #define DEBUG 1
 
@@ -10,163 +10,244 @@
 #define DBG(x)
 #endif
 
-class RandomGenerator
+Nonogram RandomGenerator::randomFromString(int rows, int cols)
 {
-public:
-    static Nonogram fromString(const std::string &input)
+    std::string grid = generateRandomStringGrid(rows, cols);
+    Nonogram nonogram = fromString(grid);
+    return nonogram;
+}
+
+Nonogram RandomGenerator::randomFromBool(int rows, int cols)
+{
+    std::vector<bool> grid = generateRandomBoolGrid(rows, cols);
+    Nonogram nonogram = fromBool(grid, cols);
+    return nonogram;
+}
+
+Nonogram RandomGenerator::fromString(const std::string &input)
+{
+    std::vector<std::string> lines = splitLines(input);
+
+    DBG("Testando string: \n"
+        << input);
+
+    if (!isValidLines(lines))
     {
-        std::vector<std::string> lines = splitLines(input);
-
-        DBG("Testando string: \n" << input);
-
-        if (!isValidLines(lines))
-        {
-            std::cerr << "Invalid grid string" << std::endl;
-            exit(1);
-        }
-
-        Nonogram new_nonogram(lines[0].size(), lines.size());
-
-        // parse lines
-        for (size_t i = 0; i < lines.size(); ++i)
-        {
-            parseLine(new_nonogram[i],lines[i]);
-            DBG("Dicas da linha " << i << ": " << new_nonogram[i].getHints().toString());
-        }
-        
-        // parse collumns
-        for (size_t i = 0; i < lines[0].size(); ++i)
-        {
-            parseLine(new_nonogram.getColumn(i));
-            DBG("Dicas da coluna " << i << ": " << new_nonogram.getColumn(i).getHints().toString());
-        }
-        
-        new_nonogram.unsetCells();
-        return new_nonogram;
+        std::cerr << "Invalid grid string" << std::endl;
+        exit(1);
     }
 
-    static Nonogram random(int rows, int cols)
+    Nonogram newNonogram(lines[0].size(), lines.size());
+
+    // parse lines
+    for (size_t i = 0; i < lines.size(); ++i)
     {
-        std::string grid = generateRandomGridString(rows, cols);
-        Nonogram nonogram = fromString(grid);
-        return nonogram;
+        parseLine(newNonogram[i], lines[i]);
+        DBG("Dicas da linha " << i << ": " << newNonogram[i].getHints().toString());
     }
 
-    static void printRandomString(int rows, int cols)
+    // parse collumns
+    for (size_t i = 0; i < lines[0].size(); ++i)
     {
-        std::string grid = generateRandomGridString(rows, cols);
-        std::cout << grid;
+        parseLine(newNonogram.getColumn(i));
+        DBG("Dicas da coluna " << i << ": " << newNonogram.getColumn(i).getHints().toString());
     }
 
-private: // metodos auxiliares
-    // Função auxiliar para gerar uma string de grid aleatória com 0s e 1s
-    static std::string generateRandomGridString(int rows, int cols)
+    newNonogram.unsetCells();
+    return newNonogram;
+}
+
+Nonogram RandomGenerator::fromBool(const std::vector<bool> &input, int cols)
+{
+    std::vector<std::vector<bool>> lines = splitLines(input, cols);
+
+    Nonogram newNonogram(lines[0].size(), lines.size());
+
+    // parse lines
+    for (size_t i = 0; i < lines.size(); ++i)
     {
-        std::string grid;
-        for (int i = 0; i < rows; ++i)
+        parseLine(newNonogram[i], lines[i]);
+        DBG("Dicas da linha " << i << ": " << newNonogram[i].getHints().toString());
+    }
+
+    // parse collumns
+    for (size_t i = 0; i < lines[0].size(); ++i)
+    {
+        parseLine(newNonogram.getColumn(i));
+        DBG("Dicas da coluna " << i << ": " << newNonogram.getColumn(i).getHints().toString());
+    }
+
+    newNonogram.unsetCells();
+    return newNonogram;
+}
+
+void RandomGenerator::printRandomString(int rows, int cols)
+{
+    std::string grid = generateRandomStringGrid(rows, cols);
+    std::cout << grid;
+}
+
+// Função auxiliar para gerar uma string de grid aleatória com 0s e 1s
+std::string RandomGenerator::generateRandomStringGrid(int rows, int cols)
+{
+    std::string grid;
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
         {
-            for (int j = 0; j < cols; ++j)
-            {
-                grid += (rand() % 2) ? '1' : '0';
-            }
-            grid += '\n';
+            grid += (rand() % 2) ? '1' : '0';
         }
-        return grid;
+        grid += '\n';
     }
+    return grid;
+}
 
-    // Função auxiliar para dividir uma string em suas linhas
-    static std::vector<std::string> splitLines(const std::string &str)
+std::vector<bool> RandomGenerator::generateRandomBoolGrid(int rows, int cols)
+{
+    std::vector<bool> grid;
+    grid.reserve(rows * cols);
+    for (int i = 0; i < rows * cols; ++i)
     {
-        std::vector<std::string> lines;
-        std::string line;
-        for (char ch : str)
-        {
-            if (ch == '\n')
-            {
-                lines.push_back(line);
-                line.clear();
-            }
-            else
-            {
-                line += ch;
-            }
-        }
-        if (!line.empty())
+        grid.push_back((rand() % 2) ? true : false);
+    }
+    return grid;
+}
+
+// Função auxiliar para dividir uma string em suas linhas
+std::vector<std::string> RandomGenerator::splitLines(const std::string &str)
+{
+    std::vector<std::string> lines;
+    std::string line;
+    for (char ch : str)
+    {
+        if (ch == '\n')
         {
             lines.push_back(line);
+            line.clear();
         }
-        return lines;
+        else
+        {
+            line += ch;
+        }
+    }
+    if (!line.empty())
+    {
+        lines.push_back(line);
+    }
+    return lines;
+}
+
+std::vector<std::vector<bool>> RandomGenerator::splitLines(const std::vector<bool> &input, int row_length)
+{
+    std::vector<std::vector<bool>> lines;
+    std::vector<bool> line;
+    line.reserve(row_length);
+    for (size_t i = 0; i < input.size(); i++)
+    {
+        line.push_back(input[i]);
+        if (line.size() == row_length)
+        {
+            lines.push_back(line);
+            line.clear();
+        }
     }
 
-    // funcao para verificar se as linhas da string sao validas (contem apenas 0 e 1s e linhas do mesmo tamanho), recebe vetor de linhas
-    static bool isValidLines(const std::vector<std::string> &lines)
+    return lines;
+}
+
+// funcao para verificar se as linhas da string sao validas (contem apenas 0 e 1s e linhas do mesmo tamanho), recebe vetor de linhas
+bool RandomGenerator::isValidLines(const std::vector<std::string> &lines)
+{
+    if (lines.empty())
+        return false;
+
+    size_t length = lines[0].size();
+    for (const auto &line : lines)
     {
-        if (lines.empty())
+        if (line.size() != length)
             return false;
-
-        size_t length = lines[0].size();
-        for (const auto &line : lines)
+        for (char ch : line)
         {
-            if (line.size() != length)
+            if (ch != '0' && ch != '1')
                 return false;
-            for (char ch : line)
-            {
-                if (ch != '0' && ch != '1')
-                    return false;
-            }
         }
-        return true;
     }
+    return true;
+}
 
-    // Parser da string de uma linha somente
-    static void parseLine(Line &line, std::string &linestr)
-    {  
-        int sequence = 0;
-  
-        for (size_t i = 0; i < line.getLength(); i++)
-        {
-            if (linestr[i] == '1')
-            {
-                line[i].set();
-                sequence++;
-            }
-            else
-            {
-                if (sequence > 0)
-                {
-                    line.addHint(sequence);
-                    sequence = 0;
-                }
-            }
-        }
-        if (sequence > 0)
-            line.addHint(sequence);
-        if (!line.getHintSize())
-            line.addHint(0);
-    }
+// Parser da string de uma linha somente
+void RandomGenerator::parseLine(Line &line, std::string &linestr)
+{
+    int sequence = 0;
 
-    // Parser de uma Line já inicializada
-    static void parseLine(Line &line)
+    for (size_t i = 0; i < line.getLength(); i++)
     {
-        // gerar dicas
-        int sequence = 0;
-        for (int i = 0; i < line.getLength(); ++i)
+        if (linestr[i] == '1')
         {
-            if (line[i].isSet())
-                sequence++;
-            else
+            line[i].set();
+            sequence++;
+        }
+        else
+        {
+            if (sequence > 0)
             {
-                if (sequence > 0)
-                {
-                    line.addHint(sequence);
-                    sequence = 0;
-                }
+                line.addHint(sequence);
+                sequence = 0;
             }
         }
-        if (sequence > 0)
-            line.addHint(sequence);
-        if (!line.getHintSize())
-            line.addHint(0);
     }
+    if (sequence > 0)
+        line.addHint(sequence);
+    if (!line.getHintSize())
+        line.addHint(0);
+}
 
-};
+void RandomGenerator::parseLine(Line &line, std::vector<bool> boolLine)
+{
+    int sequence = 0;
+
+    for (size_t i = 0; i < line.getLength(); i++)
+    {
+        if (boolLine[i])
+        {
+            line[i].set();
+            sequence++;
+        }
+        else
+        {
+            if (sequence > 0)
+            {
+                line.addHint(sequence);
+                sequence = 0;
+            }
+        }
+    }
+    if (sequence > 0)
+        line.addHint(sequence);
+    if (!line.getHintSize())
+        line.addHint(0);
+}
+
+// Parser de uma Line já inicializada
+void RandomGenerator::parseLine(Line &line)
+{
+    // gerar dicas
+    int sequence = 0;
+    for (int i = 0; i < line.getLength(); ++i)
+    {
+        if (line[i].isSet())
+            sequence++;
+        else
+        {
+            if (sequence > 0)
+            {
+                line.addHint(sequence);
+                sequence = 0;
+            }
+        }
+    }
+    if (sequence > 0)
+        line.addHint(sequence);
+    if (!line.getHintSize())
+        line.addHint(0);
+}
