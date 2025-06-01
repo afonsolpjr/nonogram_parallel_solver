@@ -36,91 +36,104 @@ bool ParallelNonogramSolver::solve()
 void ParallelNonogramSolver::worker(int id)
 {
     int index;
-    std::stack<UpdateJob> phaseUpdates, singleUpdates;
-    UpdateJob update;
+    std::stack<UpdateJob> phaseUpdates;
+
     // take possibility generation jobs
     // first for rows...
-    while (1)
-    {
-        index = getJob(true); // row job
-        if (index < 0)
-            break;
-        rowSolvers[index]->init();
-    }
+    init_work(true);
 
     // then collumns...
-    while (1)
-    {
-        index = getJob(false); // column job
-        if (index < 0)
-            break;
-        columnSolvers[index]->init();
-    }
+    init_work(false);
 
     init_barrier();
 
     // main dual-phasing loop
-    while (1)
+    while (true)
     {
-        /**
-         * ROW PHASE
-         */
-        while (1)
-        {
-            index = getJob(true); // row job
-            if (index < 0)
-                break;
-
-            rowSolvers[index]->updatePossibilities();
-            singleUpdates = rowSolvers[index]->resolveCommonPatterns();
-
-            while (!singleUpdates.empty())
-            {
-                singleUpdates.top().index = index;
-                phaseUpdates.push(singleUpdates.top());
-                singleUpdates.pop();
-            }
-        }
-        // register columns updates
-
-        while (!phaseUpdates.empty())
-        {
-            update = phaseUpdates.top();
-            insertUpdateAndJob(update, true); // critical section
-            phaseUpdates.pop();
-        }
-
+        processPhase(phaseUpdates, true);
         if (completionCheckBarrier())
             return;
 
-        /**
-         * COLLUMN PHASE
-         */
-        while (1)
-        {
-            index = getJob(false); // column job
-            if (index < 0)
-                break;
-            columnSolvers[index]->updatePossibilities();
-            singleUpdates = columnSolvers[index]->resolveCommonPatterns();
-
-            while (!singleUpdates.empty())
-            {
-                singleUpdates.top().index = index;
-                phaseUpdates.push(singleUpdates.top());
-                singleUpdates.pop();
-            }
-        }
-        // register rows updates
-        while (!phaseUpdates.empty())
-        {
-            update = phaseUpdates.top();
-            insertUpdateAndJob(update, false); // critical section
-            phaseUpdates.pop();
-        }
-
+        processPhase(phaseUpdates, false);
         if (completionCheckBarrier())
             return;
+    }
+}
+
+void ParallelNonogramSolver::init_barrier()
+{
+    static int threadsAtBarrier = 0;
+    std::unique_lock<std::mutex> lock(mutex);
+    threadsAtBarrier++;
+    if (threadsAtBarrier < nThreads)
+        cond.wait(lock);
+    else
+    {
+        threadsAtBarrier = 0;
+        // creating all initial jobs. at least once we need to check line similatiries between possibilities
+        for (int i = 0; i < nonogram->getHeight(); i++)
+            rowJobs.insert(i);
+        for (int i = 0; i < nonogram->getWidth(); i++)
+            columnJobs.insert(i);
+
+        cond.notify_all();
+    }
+}
+
+void ParallelNonogramSolver::init_work(bool isRowInit)
+{
+    int index;
+
+    auto &solvers = isRowInit ? rowSolvers : columnSolvers;
+
+    while (true)
+    {
+        index = getJob(isRowInit); // row job
+        if (index < 0)
+            break;
+        solvers[index]->init();
+    }
+}
+
+void ParallelNonogramSolver::processPhase(std::stack<UpdateJob> &phaseUpdates, bool isRowPhase)
+{
+    int index;
+
+    while (true)
+    {
+        index = getJob(isRowPhase); // row job
+        if (index < 0)
+            break;
+        phaseWork(index, phaseUpdates, isRowPhase);
+    }
+    registerPhaseUpdates(phaseUpdates, isRowPhase);
+}
+
+void ParallelNonogramSolver::phaseWork(int index, std::stack<UpdateJob> &phaseUpdates, bool isRowPhase)
+{
+    std::stack<UpdateJob> singleUpdates;
+
+    auto &solvers = isRowPhase ? rowSolvers : columnSolvers;
+
+    solvers[index]->updatePossibilities();
+    singleUpdates = solvers[index]->resolveCommonPatterns();
+
+    while (!singleUpdates.empty())
+    {
+        singleUpdates.top().index = index;
+        phaseUpdates.push(singleUpdates.top());
+        singleUpdates.pop();
+    }
+}
+
+void ParallelNonogramSolver::registerPhaseUpdates(std::stack<UpdateJob> &phaseUpdates, bool isRowPhase)
+{
+    UpdateJob update;
+    while (!phaseUpdates.empty())
+    {
+        update = phaseUpdates.top();
+        insertUpdateAndJob(update, isRowPhase); // critical section
+        phaseUpdates.pop();
     }
 }
 
@@ -131,7 +144,7 @@ void ParallelNonogramSolver::insertUpdateAndJob(UpdateJob update, bool isRowPhas
 {
     std::lock_guard<std::mutex> lock(mutex);
 
-    auto &set = isRowPhase ? columnJobs : rowJobs; // if rowPhase, insert on columnJobs, otherwise on rowJobs
+    auto &set = isRowPhase ? columnJobs : rowJobs; // if singleRowPhase, insert on columnJobs, otherwise on rowJobs
     auto &lines = isRowPhase ? columnSolvers : rowSolvers;
     lines[update.line_index]->insertUpdate(update);
     if (!lines[update.line_index]->isSolved())
@@ -188,25 +201,5 @@ bool ParallelNonogramSolver::completionCheckBarrier()
         changesMade = 0;
         cond.notify_all();
         return false;
-    }
-}
-
-void ParallelNonogramSolver::init_barrier()
-{
-    static int threadsAtBarrier = 0;
-    std::unique_lock<std::mutex> lock(mutex);
-    threadsAtBarrier++;
-    if (threadsAtBarrier < nThreads)
-        cond.wait(lock);
-    else
-    {
-        threadsAtBarrier = 0;
-        // creating all initial jobs. at least once we need to check line similatiries between possibilities
-        for (int i = 0; i < nonogram->getHeight(); i++)
-            rowJobs.insert(i);
-        for (int i = 0; i < nonogram->getWidth(); i++)
-            columnJobs.insert(i);
-
-        cond.notify_all();
     }
 }

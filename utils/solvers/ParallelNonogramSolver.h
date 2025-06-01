@@ -38,4 +38,12 @@ private:
 
     /// @brief After initialization barrier. Last threads create jobs for all rows and collumns.
     void init_barrier();
+
+    void init_work(bool isRowInit);
+
+    void processPhase(std::stack<UpdateJob> &phaseUpdates, bool isRowPhase);
+
+    void phaseWork(int index, std::stack<UpdateJob> &phaseUpdates, bool isRowPhase);
+
+    void registerPhaseUpdates(std::stack<UpdateJob> &phaseUpdates, bool isRowPhase);
 };
