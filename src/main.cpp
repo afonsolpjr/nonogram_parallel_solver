@@ -20,7 +20,7 @@ int main()
     using namespace std::chrono;
 
     std::cout << "Hello, Nonogram Solver!" << std::endl;
-    std::vector<RawPuzzleData> gamesData = NonogramPuzzleFactory::loadGamesFromFile("variooos.txt");
+    std::vector<RawPuzzleData> gamesData = NonogramPuzzleFactory::loadGamesFromFile("Games.txt");
 
     int gameNumber = 101;
 
