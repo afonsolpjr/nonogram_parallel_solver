@@ -1,32 +1,25 @@
 #pragma once
 
 #include "linesolvers/ParallelLineSolver.h"
-#include "../src/Nonogram.h"
 #include <vector>
 #include <unordered_set>
 #include <mutex>
 #include <condition_variable>
+#include "BaseSolver.h"
 
-class ParallelNonogramSolver
+class ParallelNonogramSolver : public BaseSolver<ParallelLineSolver>
 {
 public:
-    Nonogram *nonogram;
-    std::vector<ParallelLineSolver *> rowSolvers;
-    std::vector<ParallelLineSolver *> columnSolvers;
     int nThreads;
     std::mutex mutex;
     std::condition_variable cond;
     ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads);
 
     bool solve();
-    bool isSolved();
-    int rowsSize() { return rowSolvers.size(); };
-
     void worker();
 
 private:
-    std::unordered_set<int> rowsJobs,
-        columnJobs;
+    std::unordered_set<int> rowsJobs, columnJobs;
 
     //  @brief Insert a job on a jobset.
     /// @param index Index of the row/collumn to be processed.
@@ -40,9 +33,8 @@ private:
 
     /// @brief Simple barrier for the threads. Also checks for completion.
     /// @return true if puzzle complete, false otherwise.
-    bool completionCheckBarrier(); 
+    bool completionCheckBarrier();
 
     /// @brief After initialization barrier. Last threads create jobs for all rows and collumns.
-    void init_barrier(); 
-
+    void init_barrier();
 };

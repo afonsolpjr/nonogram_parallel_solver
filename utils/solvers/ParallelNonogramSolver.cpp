@@ -2,9 +2,10 @@
 #include <vector>
 #include <thread>
 
-ParallelNonogramSolver::ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads) : nonogram(&nonogram_ref),
-                                                                                       nThreads(nThreads)
+ParallelNonogramSolver::ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads) : BaseSolver(nonogram_ref)
 {
+    nonogram = &nonogram_ref;
+    this->nThreads = nThreads;
     for (int i = 0; i < nonogram->getHeight(); i++)
         rowSolvers.push_back(new ParallelLineSolver(nonogram->getRow(i)));
 
@@ -62,6 +63,8 @@ void ParallelNonogramSolver::worker()
                 break;
             rowSolvers[index]->resolveCommonPatterns();
         }
+        //register updates
+        
 
         if (completionCheckBarrier())
             return;
@@ -77,15 +80,6 @@ void ParallelNonogramSolver::worker()
         if (completionCheckBarrier())
             return;
     }
-}
-
-bool ParallelNonogramSolver::isSolved()
-{
-    for (const auto &solver : rowSolvers)
-        if (!solver->isSolved())
-            return false;
-
-    return true;
 }
 
 /// @brief Insert a job on a jobset.

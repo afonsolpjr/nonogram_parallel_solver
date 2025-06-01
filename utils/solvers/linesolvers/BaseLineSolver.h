@@ -4,7 +4,8 @@
 #include <list>
 #include <iostream>
 #include <stack>
-#include "../../src/Nonogram.h"
+#include "../../../src/Nonogram.h"
+
 template <typename UpdateType>
 class BaseLineSolver
 {

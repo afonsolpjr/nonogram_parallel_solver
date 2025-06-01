@@ -2,21 +2,6 @@
 #include "NonogramSolver.h"
 #include <vector>
 
-NonogramSolver::NonogramSolver(Nonogram &nonogram_ref) : nonogram(&nonogram_ref)
-{
-    for (int i = 0; i < nonogram->getHeight(); i++)
-        rowSolvers.push_back(new SequentialLineSolver(nonogram->getRow(i)));
-
-    for (int i = 0; i < nonogram->getWidth(); i++)
-        columnSolvers.push_back(new SequentialLineSolver(nonogram->getColumn(i)));
-}
-
-void NonogramSolver::main()
-{
-    for (const auto &solver : rowSolvers)
-        solver->print_possibilities();
-}
-
 bool NonogramSolver::solve()
 {
     while (!isSolved())
@@ -64,14 +49,5 @@ bool NonogramSolver::solve()
         if (!changesMade)
             return false;
     }
-    return true;
-}
-
-bool NonogramSolver::isSolved()
-{
-    for (const auto &solver : rowSolvers)
-        if (!solver->isSolved())
-            return false;
-
     return true;
 }

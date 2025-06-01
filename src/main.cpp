@@ -1,6 +1,8 @@
 #include <iostream>
 #include "../utils/NonogramRun.h"
-#include "../utils/ParallelNonogramSolver.h"
+#include "../utils/solvers/ParallelNonogramSolver.h"
+#include "../utils/solvers/NonogramSolver.h"
+
 
 #include <chrono>
 

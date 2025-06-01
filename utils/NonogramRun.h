@@ -1,5 +1,5 @@
 #pragma once
-#include "NonogramSolver.h"
+#include "solvers/NonogramSolver.h"
 #include "NonogramPuzzleFactory.h"
 #include <chrono>
 #include <string>
