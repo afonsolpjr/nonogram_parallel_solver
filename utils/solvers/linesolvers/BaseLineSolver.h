@@ -16,7 +16,7 @@ public:
     std::stack<UpdateType> updates;
 
     void updatePossibilities();
-    void insertUpdate(UpdateType update);
+    virtual void insertUpdate(UpdateType update) = 0;
     std::stack<UpdateType> resolveCommonPatterns();
 
     void print_possibilities();
@@ -30,14 +30,13 @@ protected:
     void play(int index, bool cell_value);
 };
 
-
 template <typename UpdateType>
 void BaseLineSolver<UpdateType>::updatePossibilities()
 {
     while (!updates.empty())
     {
         auto update = updates.top();
-        eliminatePossibilities(update.index, update.value);
+        eliminatePossibilities(update.index, update.status);
         updates.pop();
     }
 }

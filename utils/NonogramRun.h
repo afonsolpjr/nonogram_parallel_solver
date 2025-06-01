@@ -1,5 +1,6 @@
 #pragma once
 #include "solvers/NonogramSolver.h"
+#include "solvers/ParallelNonogramSolver.h"
 #include "NonogramPuzzleFactory.h"
 #include <chrono>
 #include <string>
@@ -10,10 +11,13 @@ class NonogramRun
     std::chrono::duration<double> init_time;
     std::chrono::duration<double> solve_time;
     bool is_correct = false;
+    bool is_parallel = false;
+    int nThreads = 0;
 
 public:
-    NonogramRun(const RawPuzzleData gameData);
     Nonogram puzzle;
+
+    NonogramRun(const RawPuzzleData gameData, bool parallel = false, int nThreads = 0);
 
     void run();
     void printStats() const;

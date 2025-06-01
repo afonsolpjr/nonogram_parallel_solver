@@ -11,6 +11,8 @@ struct RawPuzzleData
 class NonogramPuzzleFactory
 {
 public:
+    static Nonogram fromString(const std::string &input);
+    static Nonogram fromBool(const std::vector<bool> &input, int cols);
     static void main(std::string task);
     static void create_games(const std::vector<int> dimensions, int num_games, const std::string filename);
     static void loadGames(std::string filename);
@@ -30,4 +32,11 @@ private:
     std::vector<bool> static getDifferentGrid(const std::vector<std::vector<bool>> &grid, int dimension);
 
     static void writeGridToFile(const std::vector<bool> &grid, int dimension, const std::string &filename);
+
+    static std::vector<std::string> splitLines(const std::string &str);
+    static std::vector<std::vector<bool>> splitLines(const std::vector<bool> &input, int row_length);
+    static bool isValidLines(const std::vector<std::string> &lines);
+    static void parseLine(Line &line, std::string &linestr);
+    static void parseLine(Line &line, std::vector<bool> boolLine);
+    static void parseLine(Line &line);
 };

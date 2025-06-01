@@ -23,7 +23,7 @@ bool NonogramSolver::solve()
             while (!columnUpdates.empty())
             {
                 auto update = columnUpdates.top();
-                columnSolvers[update.index]->insertUpdate({i, update.value});
+                columnSolvers[update.index]->insertUpdate({i, update.status});
                 columnUpdates.pop();
             }
         }
@@ -41,7 +41,7 @@ bool NonogramSolver::solve()
             while (!rowUpdates.empty())
             {
                 auto update = rowUpdates.top();
-                rowSolvers[update.index]->insertUpdate({i, update.value});
+                rowSolvers[update.index]->insertUpdate({i, update.status});
                 rowUpdates.pop();
             }
         }

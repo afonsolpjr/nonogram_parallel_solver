@@ -23,7 +23,7 @@ std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
             continue;
 
         bool common = true;
-        int common_value = possibilities.front()[i];
+        bool common_value = possibilities.front()[i];
         for (const auto &possibility : possibilities)
         {
             if (possibility[i] != common_value)

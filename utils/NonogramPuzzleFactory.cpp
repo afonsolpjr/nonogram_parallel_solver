@@ -44,7 +44,7 @@ void NonogramPuzzleFactory::create_games(const std::vector<int> dimensions, int 
             fflush(stdout);
 
             std::vector<bool> grid = getDifferentGrid(grids, dimension);
-            Nonogram puzzle = RandomGenerator::fromBool(grid, dimension);
+            Nonogram puzzle = NonogramPuzzleFactory::fromBool(grid, dimension);
             NonogramSolver solver(puzzle);
             if (solver.solve() && NonogramRun::verifyCorrectness({dimension, grid}, puzzle))
             {
@@ -119,10 +119,199 @@ void NonogramPuzzleFactory::loadGames(std::string filename)
 
     for (auto it = gamesToInit.begin(); it != gamesToInit.end();)
     {
-        Nonogram puzzle = RandomGenerator::fromBool(it->grid, it->dimension);
+        Nonogram puzzle = NonogramPuzzleFactory::fromBool(it->grid, it->dimension);
         NonogramSolver solver(puzzle);
         solver.solve();
         puzzle.print();
         it = gamesToInit.erase(it);
     }
+}
+
+Nonogram NonogramPuzzleFactory::fromString(const std::string &input)
+{
+    std::vector<std::string> lines = splitLines(input);
+
+    if (!isValidLines(lines))
+    {
+        std::cerr << "Invalid grid string" << std::endl;
+        exit(1);
+    }
+
+    Nonogram newNonogram(lines[0].size(), lines.size());
+
+    // parse lines
+    for (size_t i = 0; i < lines.size(); ++i)
+    {
+        parseLine(newNonogram[i], lines[i]);
+    }
+
+    // parse collumns
+    for (size_t i = 0; i < lines[0].size(); ++i)
+    {
+        parseLine(newNonogram.getColumn(i));
+    }
+
+    newNonogram.unsetCells();
+    return newNonogram;
+}
+
+Nonogram NonogramPuzzleFactory::fromBool(const std::vector<bool> &input, int cols)
+{
+    std::vector<std::vector<bool>> lines = splitLines(input, cols);
+
+    Nonogram newNonogram(lines[0].size(), lines.size());
+
+    // parse lines
+    for (size_t i = 0; i < lines.size(); ++i)
+    {
+        parseLine(newNonogram[i], lines[i]);
+    }
+
+    // parse collumns
+    for (size_t i = 0; i < lines[0].size(); ++i)
+    {
+        parseLine(newNonogram.getColumn(i));
+    }
+
+    newNonogram.unsetCells();
+    return newNonogram;
+}
+
+// Função auxiliar para dividir uma string em suas linhas
+std::vector<std::string> NonogramPuzzleFactory::splitLines(const std::string &str)
+{
+    std::vector<std::string> lines;
+    std::string line;
+    for (char ch : str)
+    {
+        if (ch == '\n')
+        {
+            lines.push_back(line);
+            line.clear();
+        }
+        else
+        {
+            line += ch;
+        }
+    }
+    if (!line.empty())
+    {
+        lines.push_back(line);
+    }
+    return lines;
+}
+
+std::vector<std::vector<bool>> NonogramPuzzleFactory::splitLines(const std::vector<bool> &input, int row_length)
+{
+    std::vector<std::vector<bool>> lines;
+    std::vector<bool> line;
+    line.reserve(row_length);
+    for (size_t i = 0; i < input.size(); i++)
+    {
+        line.push_back(input[i]);
+        if (line.size() == row_length)
+        {
+            lines.push_back(line);
+            line.clear();
+        }
+    }
+
+    return lines;
+}
+
+// funcao para verificar se as linhas da string sao validas (contem apenas 0 e 1s e linhas do mesmo tamanho), recebe vetor de linhas
+bool NonogramPuzzleFactory::isValidLines(const std::vector<std::string> &lines)
+{
+    if (lines.empty())
+        return false;
+
+    size_t length = lines[0].size();
+    for (const auto &line : lines)
+    {
+        if (line.size() != length)
+            return false;
+        for (char ch : line)
+        {
+            if (ch != '0' && ch != '1')
+                return false;
+        }
+    }
+    return true;
+}
+
+// Parser da string de uma linha somente
+void NonogramPuzzleFactory::parseLine(Line &line, std::string &linestr)
+{
+    int sequence = 0;
+
+    for (size_t i = 0; i < line.getLength(); i++)
+    {
+        if (linestr[i] == '1')
+        {
+            line[i].set();
+            sequence++;
+        }
+        else
+        {
+            if (sequence > 0)
+            {
+                line.addHint(sequence);
+                sequence = 0;
+            }
+        }
+    }
+    if (sequence > 0)
+        line.addHint(sequence);
+    if (!line.getHintSize())
+        line.addHint(0);
+}
+
+void NonogramPuzzleFactory::parseLine(Line &line, std::vector<bool> boolLine)
+{
+    int sequence = 0;
+
+    for (size_t i = 0; i < line.getLength(); i++)
+    {
+        if (boolLine[i])
+        {
+            line[i].set();
+            sequence++;
+        }
+        else
+        {
+            if (sequence > 0)
+            {
+                line.addHint(sequence);
+                sequence = 0;
+            }
+        }
+    }
+    if (sequence > 0)
+        line.addHint(sequence);
+    if (!line.getHintSize())
+        line.addHint(0);
+}
+
+// Parser de uma Line já inicializada
+void NonogramPuzzleFactory::parseLine(Line &line)
+{
+    // gerar dicas
+    int sequence = 0;
+    for (int i = 0; i < line.getLength(); ++i)
+    {
+        if (line[i].isSet())
+            sequence++;
+        else
+        {
+            if (sequence > 0)
+            {
+                line.addHint(sequence);
+                sequence = 0;
+            }
+        }
+    }
+    if (sequence > 0)
+        line.addHint(sequence);
+    if (!line.getHintSize())
+        line.addHint(0);
 }

@@ -16,15 +16,16 @@ public:
     ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads);
 
     bool solve();
-    void worker();
+    void worker(int id);
 
 private:
-    std::unordered_set<int> rowsJobs, columnJobs;
-
+    std::unordered_set<int> rowJobs, columnJobs;
+    int changesMade=0;
+    
     //  @brief Insert a job on a jobset.
     /// @param index Index of the row/collumn to be processed.
     /// @param isRow Identifier for what type of job we need to set. If true sets a rowJob, if false a columnJob.
-    void insertJob(int index, bool isRow);
+    void insertUpdateAndJob(UpdateJob update, bool isRow);
 
     /// @brief Get a job from a jobset.
     /// @param isRow Identifier for what type of job we need to get. If true get a rowJob, if false a columnJob.

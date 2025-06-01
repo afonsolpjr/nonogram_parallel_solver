@@ -8,8 +8,9 @@
 
 struct UpdateJob
 {
-    int line_index, element_index;
-    bool status;
+    int line_index; // Index of line that is receiving the update. Not useful for the line solver though.
+    int index; // Index of element on line
+    bool status; // true for filled, false for empty
 };
 class ParallelLineSolver : public BaseLineSolver<UpdateJob>
 {

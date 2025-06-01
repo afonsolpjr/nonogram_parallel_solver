@@ -3,7 +3,8 @@
 
 struct Update
 {
-    int index, value;
+    int index;
+    bool status;
 };
 class SequentialLineSolver : public BaseLineSolver<Update>
 {
