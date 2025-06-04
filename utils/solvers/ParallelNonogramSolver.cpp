@@ -15,7 +15,7 @@ bool ParallelNonogramSolver::solve()
     std::vector<std::thread> thread_pool;
 
     // gerar trabalhos para geracao das possibilidades
-
+    start_init = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < nonogram->getHeight(); i++)
         rowJobs.insert(i);
 
@@ -69,6 +69,7 @@ void ParallelNonogramSolver::init_barrier()
         cond.wait(lock);
     else
     {
+        init_time = std::chrono::high_resolution_clock::now() - start_init;
         threadsAtBarrier = 0;
         // creating all initial jobs. at least once we need to check line similatiries between possibilities
         for (int i = 0; i < nonogram->getHeight(); i++)
@@ -77,6 +78,7 @@ void ParallelNonogramSolver::init_barrier()
             columnJobs.insert(i);
 
         cond.notify_all();
+        std::cout << "parallel init time: " << init_time.count() << "s\n";
     }
 }
 

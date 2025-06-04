@@ -4,6 +4,7 @@
 #include "../../src/Nonogram.h"
 #include <vector>
 #include <list>
+#include <chrono>
 
 template <typename LineSolverType>
 class BaseSolver
@@ -32,10 +33,16 @@ bool BaseSolver<LineSolverType>::isSolved()
 template <typename LineSolverType>
 BaseSolver<LineSolverType>::BaseSolver(Nonogram &nonogram_ref)
 {
+
+    std::chrono::duration<double> duration;
+    auto start = std::chrono::high_resolution_clock::now();
+
     nonogram = &nonogram_ref;
     for (int i = 0; i < nonogram->getHeight(); i++)
         rowSolvers.push_back(new LineSolverType(nonogram->getRow(i)));
 
     for (int i = 0; i < nonogram->getWidth(); i++)
         columnSolvers.push_back(new LineSolverType(nonogram->getColumn(i)));
+    duration = std::chrono::high_resolution_clock::now() - start;
+        std::cout << "Seq initialized in " << duration.count() << " ms\n";
 }

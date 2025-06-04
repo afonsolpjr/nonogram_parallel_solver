@@ -1,10 +1,9 @@
 #include "SequentialLineSolver.h"
-
+#include <chrono>
 SequentialLineSolver::SequentialLineSolver(Line &line_ref)
 {
     line = &line_ref;
     cells_solved = 0;
-
     int total_blocks = 0;
     for (int block_size : line->getHints().getBlocks())
     {
@@ -16,6 +15,7 @@ SequentialLineSolver::SequentialLineSolver(Line &line_ref)
 
 std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
 {
+    static int count = 0;
     std::stack<Update> result;
     std::list<int> commonIndexes;
 
@@ -27,6 +27,7 @@ std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
         play(commonIndex, (*possibilities.begin())[commonIndex]);
         result.push({commonIndex, (*possibilities.begin())[commonIndex]});
     }
+    
     return result;
 }
 
