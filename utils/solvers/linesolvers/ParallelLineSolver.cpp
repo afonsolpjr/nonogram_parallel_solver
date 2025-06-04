@@ -20,25 +20,28 @@ void ParallelLineSolver::init()
 std::stack<UpdateJob> ParallelLineSolver::resolveCommonPatterns()
 {
     std::stack<UpdateJob> result;
+    std::list<int> candidates;
 
     for (int i = 0; i < line->getLength(); i++)
-    {
-        if (!(*line)[i].isEmpty())
-            continue;
+        candidates.push_back(i);
 
-        bool common = true;
-        bool common_value = possibilities.front()[i];
-        for (const auto &possibility : possibilities)
+    for (auto possibility = std::next(possibilities.begin()); possibility != possibilities.end();)
+    {
+        auto prev = std::prev(possibility);
+        for (auto index = candidates.begin(); index != candidates.end();)
         {
-            if (possibility[i] != common_value)
-                common = false;
-        }
-        if (common)
-        {
-            play(i, common_value);
-            result.push({i,0, common_value});
+            if ((*possibility)[*index] != (*prev)[*index])
+                index = candidates.erase(index);
+            else
+                index++;
         }
     }
+
+    for (int commonIndex : candidates) {
+    play(commonIndex, (*possibilities.begin())[commonIndex]);
+    result.push({commonIndex,0, (*possibilities.begin())[commonIndex]});
+}
+
     return result;
 }
 

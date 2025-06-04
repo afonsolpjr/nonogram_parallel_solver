@@ -17,23 +17,27 @@ SequentialLineSolver::SequentialLineSolver(Line &line_ref)
 std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
 {
     std::stack<Update> result;
-    for (int i = 0; i < line->getLength(); i++)
-    {
-        if (!(*line)[i].isEmpty())
-            continue;
+    std::list<int> candidates;
 
-        bool common = true;
-        bool common_value = possibilities.front()[i];
-        for (const auto &possibility : possibilities)
+    for (int i = 0; i < line->getLength(); i++)
+        candidates.push_back(i);
+
+    for (auto possibility = std::next(possibilities.begin()); possibility != possibilities.end();)
+    {
+        auto prev = std::prev(possibility);
+        for (auto index = candidates.begin(); index != candidates.end();)
         {
-            if (possibility[i] != common_value)
-                common = false;
+            if ((*possibility)[*index] != (*prev)[*index])
+                index = candidates.erase(index);
+            else
+                index++;
         }
-        if (common)
-        {
-            play(i, common_value);
-            result.push({i, common_value});
-        }
+    }
+
+    for (int commonIndex : candidates)
+    {
+        play(commonIndex, (*possibilities.begin())[commonIndex]);
+        result.push({commonIndex, (*possibilities.begin())[commonIndex]});
     }
     return result;
 }
