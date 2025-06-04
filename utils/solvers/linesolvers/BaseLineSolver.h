@@ -28,6 +28,7 @@ protected:
     std::vector<bool> composeBlockLine(int length, int block_size, int start);
     void eliminatePossibilities(int index, bool status);
     void play(int index, bool cell_value);
+    std::list<int> getCommonIndexes();
 };
 
 template <typename UpdateType>
@@ -137,6 +138,32 @@ void BaseLineSolver<UpdateType>::play(int index, bool cell_value)
     cells_solved++;
 }
 
+template <typename UpdateType>
+std::list<int> BaseLineSolver<UpdateType>::getCommonIndexes()
+{
+    std::list<int> candidates;
+
+    for (int i = 0; i < line->getLength(); i++)
+    {
+        if (!(*line)[i].isEmpty())
+            continue;
+        candidates.push_back(i);
+    }
+
+    for (auto possibility = std::next(possibilities.begin()); possibility != possibilities.end(); possibility++)
+    {
+        auto prev = std::prev(possibility);
+        for (auto index = candidates.begin(); index != candidates.end();)
+        {
+            if ((*possibility)[*index] != (*prev)[*index])
+                index = candidates.erase(index);
+            else
+                index++;
+        }
+    }
+
+    return candidates;
+}
 template <typename UpdateType>
 void BaseLineSolver<UpdateType>::print_possibilities()
 {
