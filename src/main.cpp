@@ -22,8 +22,11 @@ int main()
     std::cout << "Hello, Nonogram Solver!" << std::endl;
     std::vector<RawPuzzleData> gamesData = NonogramPuzzleFactory::loadGamesFromFile("Games.txt");
 
-    int gameNumber = 101;
+    int gameNumber;
 
+
+    std::cin >> gameNumber;
+    
     auto sequential = new NonogramRun(gamesData[gameNumber]);
     auto parallel = new NonogramRun(gamesData[gameNumber],true,4);
 
