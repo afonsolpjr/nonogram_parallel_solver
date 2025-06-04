@@ -20,9 +20,13 @@ std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
     std::list<int> candidates;
 
     for (int i = 0; i < line->getLength(); i++)
+    {
+        if (!(*line)[i].isEmpty())
+            continue;
         candidates.push_back(i);
-
-    for (auto possibility = std::next(possibilities.begin()); possibility != possibilities.end();)
+    }
+    print_possibilities();
+    for (auto possibility = std::next(possibilities.begin()); possibility != possibilities.end(); possibility++)
     {
         auto prev = std::prev(possibility);
         for (auto index = candidates.begin(); index != candidates.end();)
@@ -36,6 +40,7 @@ std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
 
     for (int commonIndex : candidates)
     {
+
         play(commonIndex, (*possibilities.begin())[commonIndex]);
         result.push({commonIndex, (*possibilities.begin())[commonIndex]});
     }
