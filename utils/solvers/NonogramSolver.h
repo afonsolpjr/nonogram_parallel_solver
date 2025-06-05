@@ -12,4 +12,5 @@ public:
         : BaseSolver<SequentialLineSolver>(nonogramref) {}
 
     bool solve();
+    void init();
 };

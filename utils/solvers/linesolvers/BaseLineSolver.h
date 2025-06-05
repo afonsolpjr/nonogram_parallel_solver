@@ -24,11 +24,11 @@ public:
     void print_possibilities();
 
     bool isSolved();
+    void generatePossibilities();
 
 protected:
     std::vector<std::vector<int>> generateCombinations(std::vector<int> n, int k);
 
-    void generatePossibilities();
     std::vector<bool> composeBlockLine(int length, int block_size, int start);
     void eliminatePossibilities(int index, bool status);
     void play(int index, bool cell_value);

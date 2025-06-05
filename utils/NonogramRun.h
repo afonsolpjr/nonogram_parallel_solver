@@ -17,6 +17,7 @@ class NonogramRun
 public:
     Nonogram puzzle;
 
+    
     NonogramRun(const RawPuzzleData gameData, bool parallel = false, int nThreads = 0);
 
     void run();

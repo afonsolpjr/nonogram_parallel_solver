@@ -9,18 +9,39 @@ ParallelNonogramSolver::ParallelNonogramSolver(Nonogram &nonogram_ref, int nThre
     //        "Solvers subjacentes: rows = %ld \t cols = %ld",
     //        rowSolvers.size(), columnSolvers.size());
 }
-
-bool ParallelNonogramSolver::solve()
+void ParallelNonogramSolver::init()
 {
     std::vector<std::thread> thread_pool;
 
     // gerar trabalhos para geracao das possibilidades
-    start_init = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < nonogram->getHeight(); i++)
         rowJobs.insert(i);
 
     for (int i = 0; i < nonogram->getWidth(); i++)
         columnJobs.insert(i);
+
+    for (int i = 0; i < nThreads; i++)
+        thread_pool.emplace_back(&ParallelNonogramSolver::init_worker, this);
+
+    for (auto &thread : thread_pool)
+        thread.join();
+}
+
+void ParallelNonogramSolver::init_worker()
+{
+    // take possibility generation jobs
+    // first for rows...
+    init_work(true);
+
+    // then collumns...
+    init_work(false);
+
+    init_barrier();
+    return;
+}
+bool ParallelNonogramSolver::solve()
+{
+    std::vector<std::thread> thread_pool;
 
     // disparar threads
 
@@ -37,15 +58,6 @@ void ParallelNonogramSolver::worker(int id)
 {
     int index;
     std::stack<UpdateJob> phaseUpdates;
-
-    // take possibility generation jobs
-    // first for rows...
-    init_work(true);
-
-    // then collumns...
-    init_work(false);
-
-    init_barrier();
 
     // main dual-phasing loop
     while (true)
@@ -69,7 +81,6 @@ void ParallelNonogramSolver::init_barrier()
         cond.wait(lock);
     else
     {
-        init_time = std::chrono::high_resolution_clock::now() - start_init;
         threadsAtBarrier = 0;
         // creating all initial jobs. at least once we need to check line similatiries between possibilities
         for (int i = 0; i < nonogram->getHeight(); i++)
@@ -78,7 +89,6 @@ void ParallelNonogramSolver::init_barrier()
             columnJobs.insert(i);
 
         cond.notify_all();
-        std::cout << "parallel init time: " << init_time.count() << "s\n";
     }
 }
 
@@ -93,7 +103,7 @@ void ParallelNonogramSolver::init_work(bool isRowInit)
         index = getJob(isRowInit); // row job
         if (index < 0)
             break;
-        solvers[index]->init();
+        solvers[index]->generatePossibilities();
     }
 }
 

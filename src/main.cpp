@@ -17,7 +17,6 @@ void executeGame(int game_number)
 
 int main()
 {
-    using namespace std::chrono;
 
     std::cout << "Hello, Nonogram Solver!" << std::endl;
     std::vector<RawPuzzleData> gamesData = NonogramPuzzleFactory::loadGamesFromFile("Games.txt");
@@ -25,8 +24,9 @@ int main()
     int gameNumber = 0;
 
     std::cin >> gameNumber;
+
     auto sequential = new NonogramRun(gamesData[gameNumber]);
-    auto parallel = new NonogramRun(gamesData[gameNumber],true,4);
+    auto parallel = new NonogramRun(gamesData[gameNumber],true,8);
 
     std::cout << "Running game number: " << gameNumber << std::endl;
     sequential->run();

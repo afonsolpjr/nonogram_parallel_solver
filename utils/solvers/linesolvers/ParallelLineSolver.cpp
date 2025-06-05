@@ -6,10 +6,6 @@ ParallelLineSolver::ParallelLineSolver(Line &lineRef)
     cells_solved = 0;
 }
 
-void ParallelLineSolver::init()
-{
-    generatePossibilities();
-}
 
 std::stack<UpdateJob> ParallelLineSolver::resolveCommonPatterns()
 {

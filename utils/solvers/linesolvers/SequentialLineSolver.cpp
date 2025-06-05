@@ -4,7 +4,6 @@ SequentialLineSolver::SequentialLineSolver(Line &line_ref)
 {
     line = &line_ref;
     cells_solved = 0;
-    generatePossibilities();
 }
 
 std::stack<Update> SequentialLineSolver::resolveCommonPatterns()

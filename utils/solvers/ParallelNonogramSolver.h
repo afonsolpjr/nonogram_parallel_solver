@@ -6,7 +6,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "BaseSolver.h"
-#include <chrono>
+
 class ParallelNonogramSolver : public BaseSolver<ParallelLineSolver>
 {
 public:
@@ -15,10 +15,11 @@ public:
     std::condition_variable cond;
     ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads);
     std::chrono::_V2::system_clock::time_point start_init;
-    std::chrono::duration<double> init_time;
 
     bool solve();
     void worker(int id);
+    void init();
+    void init_worker();
 
 private:
     std::unordered_set<int> rowJobs, columnJobs;

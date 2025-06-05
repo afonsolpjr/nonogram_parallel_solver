@@ -51,3 +51,12 @@ bool NonogramSolver::solve()
     }
     return true;
 }
+
+void NonogramSolver::init()
+{
+    for( auto& solver : rowSolvers )
+        solver->generatePossibilities();
+    
+    for( auto& solver : columnSolvers )
+        solver->generatePossibilities();
+}

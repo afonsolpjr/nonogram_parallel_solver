@@ -4,25 +4,33 @@
 
 NonogramRun::NonogramRun(const RawPuzzleData gameData, bool parallel, int nThreads) : gameData(gameData), is_parallel(parallel), nThreads(nThreads)
 {
-    auto start = std::chrono::high_resolution_clock::now();
     puzzle = NonogramPuzzleFactory::fromBool(gameData.grid, gameData.dimension);
-    init_time = std::chrono::high_resolution_clock::now() - start;
 }
 
 void NonogramRun::run()
 {
-    auto start = std::chrono::high_resolution_clock::now();
     if (is_parallel)
     {
         ParallelNonogramSolver solver(puzzle, nThreads);
+        auto start = std::chrono::high_resolution_clock::now();
+        solver.init();
+        init_time = std::chrono::high_resolution_clock::now() - start;
+
+        start = std::chrono::high_resolution_clock::now();
         solver.solve();
+        solve_time = std::chrono::high_resolution_clock::now() - start;
     }
     else
     {
         NonogramSolver solver(puzzle);
+        auto start = std::chrono::high_resolution_clock::now();
+        solver.init();
+        init_time = std::chrono::high_resolution_clock::now() - start;
+
+        start = std::chrono::high_resolution_clock::now();
         solver.solve();
+        solve_time = std::chrono::high_resolution_clock::now() - start;
     }
-    solve_time = std::chrono::high_resolution_clock::now() - start;
 
     verifyCorrectness();
     printStats();
@@ -33,6 +41,7 @@ void NonogramRun::printStats() const
     printf("Tamanho do Jogo: %dx%d\n", puzzle.getHeight(), puzzle.getWidth());
     std::cout << "Tempo de inicialização: " << init_time.count() << "s\n";
     std::cout << "Tempo de resolução: " << solve_time.count() << "s\n";
+    std::cout << "Total: " << (init_time + solve_time).count() << "s\n";
     std::cout << "Solução " << (is_correct ? "CORRETA" : "INCORRETA") << "\n\n";
 }
 
