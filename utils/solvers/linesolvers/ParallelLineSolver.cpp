@@ -8,13 +8,7 @@ ParallelLineSolver::ParallelLineSolver(Line &lineRef)
 
 void ParallelLineSolver::init()
 {
-    int total_blocks = 0;
-    for (int block_size : line->getHints().getBlocks())
-    {
-        total_blocks += block_size;
-    }
-    int slack = line->getLength() - (total_blocks + line->getHintSize() - 1);
-    this->possibilities = generatePossibilities(*line, slack);
+    generatePossibilities();
 }
 
 std::stack<UpdateJob> ParallelLineSolver::resolveCommonPatterns()

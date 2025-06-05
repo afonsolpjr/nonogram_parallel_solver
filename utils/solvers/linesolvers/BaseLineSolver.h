@@ -19,16 +19,21 @@ public:
     virtual void insertUpdate(UpdateType update) = 0;
     std::stack<UpdateType> resolveCommonPatterns();
 
-    void print_possibilities();
     void print_possibility(const std::vector<bool> &possibility);
+
+    void print_possibilities();
+
     bool isSolved();
 
 protected:
-    std::list<std::vector<bool>> generatePossibilities(const Line &line, int slack);
+    std::vector<std::vector<int>> generateCombinations(std::vector<int> n, int k);
+
+    void generatePossibilities();
     std::vector<bool> composeBlockLine(int length, int block_size, int start);
     void eliminatePossibilities(int index, bool status);
     void play(int index, bool cell_value);
     std::list<int> getCommonIndexes();
+    void combinationToPossibility(std::vector<int> combination);
 };
 
 template <typename UpdateType>
@@ -59,47 +64,35 @@ bool BaseLineSolver<UpdateType>::isSolved()
 }
 
 template <typename UpdateType>
-std::list<std::vector<bool>> BaseLineSolver<UpdateType>::generatePossibilities(const Line &line, int slack)
+void BaseLineSolver<UpdateType>::generatePossibilities()
 {
-    std::list<std::vector<bool>> combinations;
-    int block_size = line.getHint(0);
-    if (line.getHintSize() == 1) // base recursive case: there is only one hint on the line
+    if (!line->getHintSize())
     {
-        int length = line.getLength();
-        for (int start = 0; start <= slack; start++)
-            combinations.push_back(composeBlockLine(length, block_size, start));
-        return combinations;
+        possibilities.emplace_back(std::vector<bool>(line->getLength(), false));
+        return;
     }
-    else // having more than one hint...
+
+    int filledCells = 0;
+
+    for (const auto blockSize : line->getHints().getBlocks())
+        filledCells += blockSize;
+
+    int blockedCells = line->getHintSize() - 1;
+    int freeCells = line->getLength() - (filledCells + blockedCells);
+    int nGroups = line->getHintSize();
+    int availableSpace = freeCells + nGroups;
+
+    auto choices = std::vector<int>(availableSpace);
+
+    for (int i = 0; i < availableSpace; i++)
+        choices[i] = i;
+
+    auto combinations = generateCombinations(choices, nGroups);
+
+    for (auto &combination : combinations)
     {
-        for (int start = 0; start <= slack; start++)
-        {
-            std::list<std::vector<bool>> slack_combinations;
-
-            int base_size = start + block_size + 1;
-
-            // for each use of a slack cell, we will have a base combination that will recursively define how the remaining blocks will be displayed
-            std::vector<bool> base_combination = composeBlockLine(base_size, block_size, start);
-
-            // creating new line with remaining hints, and getting remaining combinations
-            Line remaining_line(line.getLength() - base_size, false);
-            for (int j = 1; j < line.getHintSize(); ++j)
-                remaining_line.addHint(line.getHint(j));
-
-            std::list<std::vector<bool>> remaining_combinations = generatePossibilities(remaining_line, slack - start);
-            // merging the actual base combination with the remaning ones
-            for (const auto &remaining_combination : remaining_combinations)
-            {
-                std::vector<bool> combination = base_combination;
-                combination.insert(combination.end(), remaining_combination.begin(), remaining_combination.end());
-                // putting everything based on this "slack use" on a list
-                slack_combinations.push_back(combination);
-            }
-            // merging
-            combinations.insert(combinations.end(), slack_combinations.begin(), slack_combinations.end());
-        }
+        combinationToPossibility(combination);
     }
-    return combinations;
 }
 
 template <typename UpdateType>
@@ -164,9 +157,57 @@ std::list<int> BaseLineSolver<UpdateType>::getCommonIndexes()
 
     return candidates;
 }
+
 template <typename UpdateType>
 void BaseLineSolver<UpdateType>::print_possibilities()
 {
     for (const auto &possibility : possibilities)
         print_possibility(possibility);
+}
+
+template <typename UpdateType>
+std::vector<std::vector<int>> BaseLineSolver<UpdateType>::generateCombinations(std::vector<int> n, int k)
+{
+    std::vector<std::vector<int>> result;
+    if (k == 1)
+    {
+        for (int i : n)
+            result.push_back({i});
+        return result;
+    }
+    else
+    {
+        for (int i = 0; i < n.size(); i++)
+        {
+            auto head = n[i];
+
+            auto tail = generateCombinations(std::vector<int>(n.begin() + i + 1, n.end()), k - 1);
+
+            for (auto &vec : tail)
+            {
+                vec.insert(vec.begin(), head);
+                result.push_back(vec);
+            }
+        }
+        return result;
+    }
+}
+
+template <typename UpdateType>
+void BaseLineSolver<UpdateType>::combinationToPossibility(std::vector<int> combination)
+{
+    auto possibility = std::vector<bool>(line->getLength(), false);
+
+    int nBlocksFilled = 0;
+    int nHintsDone = 0;
+    while (nHintsDone < line->getHintSize())
+    {
+        int starting_index = combination[nHintsDone] + nBlocksFilled;
+        for (int i = starting_index; i < (starting_index + line->getHint(nHintsDone)); i++)
+            possibility[i] = true;
+
+        nBlocksFilled += line->getHint(nHintsDone);
+        nHintsDone++;
+    }
+    possibilities.push_back(possibility);
 }

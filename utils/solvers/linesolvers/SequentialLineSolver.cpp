@@ -4,13 +4,7 @@ SequentialLineSolver::SequentialLineSolver(Line &line_ref)
 {
     line = &line_ref;
     cells_solved = 0;
-    int total_blocks = 0;
-    for (int block_size : line->getHints().getBlocks())
-    {
-        total_blocks += block_size;
-    }
-    int slack = line->getLength() - (total_blocks + line->getHintSize() - 1);
-    this->possibilities = generatePossibilities(*line, slack);
+    generatePossibilities();
 }
 
 std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
@@ -27,7 +21,7 @@ std::stack<Update> SequentialLineSolver::resolveCommonPatterns()
         play(commonIndex, (*possibilities.begin())[commonIndex]);
         result.push({commonIndex, (*possibilities.begin())[commonIndex]});
     }
-    
+
     return result;
 }
 
