@@ -11,7 +11,7 @@ public:
 
     void set() { state = 1; }
     void unset() { state = 0; }
-    void setBlocked() { state = -1; }
+    void block() { state = -1; }
 
     bool isSet() const { return state == 1; }
     bool isEmpty() const { return state == 0; }

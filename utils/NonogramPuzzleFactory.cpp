@@ -31,12 +31,12 @@ void NonogramPuzzleFactory::create_games(const std::vector<int> dimensions, int 
     std::ofstream out(filename, std::ios::trunc);
     out.close();
     int unsolvables = 0;
+    std::srand(static_cast<unsigned int>(time(0)));
+
     for (const auto dimension : dimensions)
     {
         std::vector<std::vector<bool>> grids;
         grids.reserve(num_games);
-
-        std::srand(static_cast<unsigned int>(time(0)));
 
         while (grids.size() != num_games)
         {
@@ -44,8 +44,9 @@ void NonogramPuzzleFactory::create_games(const std::vector<int> dimensions, int 
             fflush(stdout);
 
             std::vector<bool> grid = getDifferentGrid(grids, dimension);
-            Nonogram puzzle = NonogramPuzzleFactory::fromBool(grid, dimension);
+            Nonogram puzzle = fromBool(grid, dimension);
             NonogramSolver solver(puzzle);
+            solver.init();
             if (solver.solve() && NonogramRun::verifyCorrectness({dimension, grid}, puzzle))
             {
                 grids.push_back(grid);
@@ -177,7 +178,6 @@ Nonogram NonogramPuzzleFactory::fromBool(const std::vector<bool> &input, int col
     return newNonogram;
 }
 
-// Função auxiliar para dividir uma string em suas linhas
 std::vector<std::string> NonogramPuzzleFactory::splitLines(const std::string &str)
 {
     std::vector<std::string> lines;
@@ -219,7 +219,6 @@ std::vector<std::vector<bool>> NonogramPuzzleFactory::splitLines(const std::vect
     return lines;
 }
 
-// funcao para verificar se as linhas da string sao validas (contem apenas 0 e 1s e linhas do mesmo tamanho), recebe vetor de linhas
 bool NonogramPuzzleFactory::isValidLines(const std::vector<std::string> &lines)
 {
     if (lines.empty())
@@ -239,7 +238,6 @@ bool NonogramPuzzleFactory::isValidLines(const std::vector<std::string> &lines)
     return true;
 }
 
-// Parser da string de uma linha somente
 void NonogramPuzzleFactory::parseLine(Line &line, std::string &linestr)
 {
     int sequence = 0;
@@ -292,7 +290,6 @@ void NonogramPuzzleFactory::parseLine(Line &line, std::vector<bool> boolLine)
         line.addHint(0);
 }
 
-// Parser de uma Line já inicializada
 void NonogramPuzzleFactory::parseLine(Line &line)
 {
     // gerar dicas

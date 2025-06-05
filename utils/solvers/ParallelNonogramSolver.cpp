@@ -9,6 +9,7 @@ ParallelNonogramSolver::ParallelNonogramSolver(Nonogram &nonogram_ref, int nThre
     //        "Solvers subjacentes: rows = %ld \t cols = %ld",
     //        rowSolvers.size(), columnSolvers.size());
 }
+
 void ParallelNonogramSolver::init()
 {
     std::vector<std::thread> thread_pool;
@@ -39,6 +40,7 @@ void ParallelNonogramSolver::init_worker()
     init_barrier();
     return;
 }
+
 bool ParallelNonogramSolver::solve()
 {
     std::vector<std::thread> thread_pool;
@@ -149,9 +151,6 @@ void ParallelNonogramSolver::registerPhaseUpdates(std::stack<UpdateJob> &phaseUp
     }
 }
 
-/// @brief Insert a job on a jobset.
-/// @param index Index of the row/collumn to be processed.
-/// @param isRow Identifier for what type of job we need to set. If true sets a rowJob, if false a columnJob.
 void ParallelNonogramSolver::insertUpdateAndJob(UpdateJob update, bool isRowPhase)
 {
     std::lock_guard<std::mutex> lock(mutex);
@@ -165,9 +164,6 @@ void ParallelNonogramSolver::insertUpdateAndJob(UpdateJob update, bool isRowPhas
     changesMade++;
 }
 
-/// @brief Get a job from a jobset.
-/// @param isRow Identifier for what type of job we need to get. If true get a rowJob, if false a columnJob.
-/// @return Index of a line to process, or a negative value if there is no jobs.
 int ParallelNonogramSolver::getJob(bool isRow)
 {
     std::lock_guard<std::mutex> lock(mutex);

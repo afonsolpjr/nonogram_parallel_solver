@@ -25,7 +25,7 @@ private:
     std::unordered_set<int> rowJobs, columnJobs;
     int changesMade = 0;
 
-    //  @brief Insert a job on a jobset.
+    /// @brief Insert a job on a jobset.
     /// @param index Index of the row/collumn to be processed.
     /// @param isRow Identifier for what type of job we need to set. If true sets a rowJob, if false a columnJob.
     void insertUpdateAndJob(UpdateJob update, bool isRow);
@@ -39,7 +39,7 @@ private:
     /// @return true if puzzle complete, false otherwise.
     bool completionCheckBarrier();
 
-    /// @brief After initialization barrier. Last threads create jobs for all rows and collumns.
+    /// @brief Wait for other threads initialization. The last thread create jobs for all rows and collumns, so at least once the rows and collumns have their possibilities checked.
     void init_barrier();
 
     void init_work(bool isRowInit);

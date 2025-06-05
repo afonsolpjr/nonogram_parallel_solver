@@ -30,10 +30,6 @@ Nonogram::Nonogram(int width, int height) : width(width), height(height)
         columns.push_back(line);
     }
 }
-
-/// @brief Returns a reference to the row at the specified index.
-/// @param index [int]
-/// @return [Line&] Reference to the row at the specified index.
 Line &Nonogram::getRow(int index)
 {
     if (index < 0 || index >= height)
@@ -42,9 +38,6 @@ Line &Nonogram::getRow(int index)
     }
     return rows[index];
 }
-/// @brief Returns a reference to the column at the specified index.
-/// @param index [int]
-/// @return [Line&] Reference to the column at the specified index.
 Line &Nonogram::getColumn(int index)
 {
     if (index < 0 || index >= width)
@@ -54,8 +47,7 @@ Line &Nonogram::getColumn(int index)
     return columns[index];
 }
 
-/// @brief Prints the Nonogram grid to the console.
-/// @details Each row is printed on a new line, and cells are represented as '1' (filled) or '0' (empty).
+
 void Nonogram::print() const
 {
     // Print the column hints above grid, and row hints to the left
@@ -113,7 +105,6 @@ void Nonogram::print() const
 
 }
 
-/// @brief Unset All cells
 void Nonogram::unsetCells()
 {
     for (size_t i = 0; i < this->height; i++)
