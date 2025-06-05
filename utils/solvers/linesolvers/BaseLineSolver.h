@@ -177,7 +177,7 @@ std::vector<std::vector<int>> BaseLineSolver<UpdateType>::generateCombinations(s
     }
     else
     {
-        for (int i = 0; i < n.size(); i++)
+        for (int i = 0; i < n.size() - k + 1; i++)
         {
             auto head = n[i];
 
