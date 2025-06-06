@@ -5,9 +5,11 @@
 ParallelNonogramSolver::ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads) : BaseSolver(nonogram_ref)
 {
     this->nThreads = nThreads;
-    // printf("Nonogram solver iniciado\n"
-    //        "Solvers subjacentes: rows = %ld \t cols = %ld",
-    //        rowSolvers.size(), columnSolvers.size());
+
+    // printf("\nNonogram solver iniciado"
+    //        "\nSolvers subjacentes: rows = %ld \t cols = %ld"
+    //        "\ncompleted =%d \t threadsAtBarrier = %d",
+    //        rowSolvers.size(), columnSolvers.size(), completed, threadsAtBarrier);
 }
 
 void ParallelNonogramSolver::init()
@@ -53,7 +55,7 @@ bool ParallelNonogramSolver::solve()
     for (auto &thread : thread_pool)
         thread.join();
 
-    return true;
+    return isSolved();
 }
 
 void ParallelNonogramSolver::worker(int id)
@@ -65,18 +67,19 @@ void ParallelNonogramSolver::worker(int id)
     while (true)
     {
         processPhase(phaseUpdates, true);
+
         if (completionCheckBarrier())
-            return;
+            break;
 
         processPhase(phaseUpdates, false);
+
         if (completionCheckBarrier())
-            return;
+            break;
     }
 }
 
 void ParallelNonogramSolver::init_barrier()
 {
-    static int threadsAtBarrier = 0;
     std::unique_lock<std::mutex> lock(mutex);
     threadsAtBarrier++;
     if (threadsAtBarrier < nThreads)
@@ -181,18 +184,16 @@ int ParallelNonogramSolver::getJob(bool isRow)
 
 bool ParallelNonogramSolver::completionCheckBarrier()
 {
-    static int threadsAtBarrier = 0;
-    static bool completed = false;
+
     std::unique_lock<std::mutex> lock(mutex);
 
     threadsAtBarrier++;
-
     if (threadsAtBarrier < nThreads)
     {
         cond.wait(lock);
         return completed;
     }
-    else if (isSolved() || changesMade == 0)
+    else if (changesMade == 0 || isSolved())
     {
         completed = true;
         cond.notify_all();
@@ -207,6 +208,7 @@ bool ParallelNonogramSolver::completionCheckBarrier()
         //        "\n\t Mudanças feitas: %d\n",
         //        rowJobs.size(), columnJobs.size(), changesMade);
         changesMade = 0;
+
         cond.notify_all();
         return false;
     }

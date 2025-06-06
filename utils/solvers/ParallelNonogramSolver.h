@@ -13,8 +13,10 @@ public:
     int nThreads;
     std::mutex mutex;
     std::condition_variable cond;
+    int threadsAtBarrier = 0;
+    bool completed = false; 
     ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads);
-    std::chrono::_V2::system_clock::time_point start_init;
+    
 
     bool solve();
     void worker(int id);
