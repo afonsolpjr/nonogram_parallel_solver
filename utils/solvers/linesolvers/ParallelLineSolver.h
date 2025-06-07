@@ -20,8 +20,6 @@ public:
     std::stack<UpdateJob> resolveCommonPatterns();
     void insertUpdate(UpdateJob updateJob);
 
-    void init();
-
 private:
     std::mutex mutex;
 };

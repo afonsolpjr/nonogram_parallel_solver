@@ -273,7 +273,7 @@ Função construtora para inicializar um objeto BaseSolver com um Nonogram de re
 ```c++
     NonogramSolver(Nonogram &nonogramref): BaseSolver<SequentialLineSolver>(nonogramref)
 ```
-
+Função para verificar se a linha ou coluna está totalmente resolvida. Retorna true se a quantidade de células resolvidas (cells_solved) for igual ao comprimento da linha (line->getLength()), indicando que não há mais células a serem definidas:
 ```c++
     template <typename LineSolverType>
     bool BaseSolver<LineSolverType>::isSolved()
@@ -343,97 +343,98 @@ Função para registrar atualizações da fase atual: enquanto houver atualizaç
 
 ## linvesolvers
 ### BaseLineSolver.h e BaseLineSolver.cpp
+Função para processar todas as atualizações pendentes no solver da linha/coluna: enquanto houver atualizações na pilha updates, remove uma atualização, e aplica eliminatePossibilities para eliminar possibilidades com base no índice e status indicados:
 ```c++
     template <typename UpdateType>
     void updatePossibilities();
 ```
-
+Função virtual pura que deve ser implementada pelas classes derivadas. O propósito desta função é inserir uma atualização do tipo UpdateType em alguma estrutura de dados interna, que representa as mudanças a serem aplicadas na linha ou coluna correspondente. Como é uma função abstrata, obriga as subclasses a definirem seu comportamento específico para lidar com as atualizações:
 ```c++
     template <typename UpdateType>
     virtual void insertUpdate(UpdateType update) = 0;
 ```
-
-```c++
-    template <typename UpdateType>
-    std::stack<UpdateType> resolveCommonPatterns();
-```
-
+Função auxiliar para imprimir uma possibilidade de configuração da linha/coluna: imprime cada célula (bool) separada por espaço, seguida de uma quebra de linha
 ```c++
     template <typename UpdateType>
     void print_possibility(const std::vector<bool> &possibility);
 ```
-
+Função que imprime todas as possibilidades atualmente armazenadas. Para cada possibilidade no vetor possibilities, chama a função print_possibility que realiza a impressão da configuração daquela possibilidade:
 ```c++
     template <typename UpdateType>
     void print_possibilities();
 ```
-
+Função para verificar se a linha/coluna foi completamente resolvida, comparando se o número de células resolvidas (cells_solved) é igual ao comprimento da linha (line->getLength()), retornando true se sim:
 ```c++
     template <typename UpdateType>
     bool isSolved();
 ```
+Função que gera todas as possíveis configurações de uma linha ou coluna baseadas nas dicas (hints) fornecidas:
 
+* Se a linha não tem dicas (tamanho zero), cria uma possibilidade com todos os valores false (vazio).
+
+* Calcula a quantidade de células preenchidas, células bloqueadas (espaços entre blocos) e o espaço livre restante.
+
+* Com base nisso, gera todas as combinações possíveis de posicionamento dos blocos dentro do espaço disponível.
+
+* Para cada combinação, converte a posição dos blocos em uma possibilidade binária (true para célula preenchida, false para vazia).
 ```c++
     template <typename UpdateType>
     void generatePossibilities();
 ```
-
+Função recursiva que gera todas as combinações possíveis de tamanho k a partir do vetor de inteiros n. Se k é igual a 1, simplesmente retorna cada elemento de n como uma combinação unitária. Caso contrário, para cada elemento em n (limitado para permitir combinações de tamanho k), seleciona o elemento atual como cabeça da combinação e chama recursivamente para obter as combinações restantes (k-1) nos elementos subsequentes. Combina a cabeça com cada combinação recursiva e acumula os resultados. Retorna o vetor com todas as combinações geradas:
 ```c++
     template <typename UpdateType>
     std::vector<std::vector<int>> generateCombinations(std::vector<int> n, int k);
 ```
-
+Função para criar uma linha (vetor booleano) de comprimento length com um bloco contínuo de células preenchidas (true) começando no índice start e ocupando block_size células. Preenche true do índice start até start + block_size - 1. As demais posições são preenchidas com false. Retorna o vetor booleano representando o bloco:
 ```c++
     template <typename UpdateType>
     std::vector<bool> composeBlockLine(int length, int block_size, int start);
 ```
-
+Função para eliminar possibilidades inválidas com base em uma atualização no índice index da linha. Percorre todas as possibilidades existentes. Remove qualquer possibilidade cuja célula no índice index não coincida com o status esperado (true ou false). Mantém apenas as possibilidades compatíveis com as atualizações atuais:
 ```c++
     template <typename UpdateType>
     void eliminatePossibilities(int index, bool status);
 ```
-
+Função que marca uma célula na linha ou coluna como preenchida ou bloqueada de acordo com o valor booleano cell_value. Se cell_value for verdadeiro, chama setCell para indicar que a célula está preenchida; caso contrário, chama blockCell para indicar que a célula está bloqueada. Após isso, incrementa o contador cells_solved para refletir que uma célula foi resolvida:
 ```c++
     template <typename UpdateType>
     void play(int index, bool cell_value);
 ```
-
+Função que retorna uma lista de índices das células que são comuns a todas as possibilidades restantes e ainda estão indefinidas na linha ou coluna. Inicialmente, cria uma lista de candidatos com as células que estão vazias (não definidas). Depois, para cada possibilidade a partir da segunda, compara as células nos índices candidatos com a possibilidade anterior. Caso haja alguma diferença, o índice é removido da lista de candidatos. No fim, retorna os índices das células que são iguais em todas as possibilidades:
 ```c++
     template <typename UpdateType>
     std::list<int> getCommonIndexes();
 ```
-
+Função que transforma uma combinação de posições em uma possibilidade binária para a linha ou coluna. Inicializa um vetor booleano do tamanho da linha com todos os valores falsos. Para cada bloco de dicas (hint), calcula o índice inicial somando o deslocamento da combinação com a soma dos tamanhos dos blocos anteriores já preenchidos. Marca as células correspondentes a esse bloco como verdadeiras (true) no vetor de possibilidade. Ao final, adiciona essa possibilidade ao vetor possibilities:
 ```c++
     template <typename UpdateType>
     void combinationToPossibility(std::vector<int> combination);
 ```
 
 ### ParallelLineSolver.h e ParallelLineSolver.cpp
+Função construtora da classe ParallelLineSolver que inicializa o solver para uma linha ou coluna específica do nonograma. Recebe uma referência para o objeto Line que representa a linha/coluna a ser resolvida e armazena seu endereço no ponteiro line. Inicializa o contador cells_solved com zero, indicando que nenhuma célula foi resolida ainda:
 ```c++
     ParallelLineSolver(Line &lineRef);
 ```
-
+Função que identifica os padrões comuns entre todas as possibilidades atuais da linha ou coluna. Primeiro, obtém os índices das células que possuem o mesmo valor em todas as possibilidades válidas usando getCommonIndexes(). Em seguida, para cada índice comum, a função atualiza a célula no objeto line chamando play com o valor correspondente da primeira possibilidade (já que todas são iguais nesse índice). Além disso, cria um UpdateJob com o índice, status e valor da célula e o adiciona a uma pilha, que será retornada ao final da execução para que outras partes do programa possam aplicar essas atualizações:
 ```c++
     std::stack<UpdateJob> resolveCommonPatterns();
 ```
-
+Função que insere uma atualização na fila interna de atualizações a serem processadas. Para garantir a segurança em ambiente multithread, utiliza um std::lock_guard para proteger o acesso à estrutura compartilhada updates e à variável cells_solved. A cada inserção, incrementa o contador de células resolvidas (cells_solved) e empilha o UpdateJob passado como argumento, para posterior processamento:
 ```c++
     void insertUpdate(UpdateJob updateJob);
 ```
-
-```c++
-    void init();
-```
 ### SequentialLineSolver.h e SequentialLineSolver.cpp
-
+Função construtora da classe SequentialLineSolver que inicializa o solver para uma linha ou coluna do nonograma. Recebe uma referência para o objeto Line que representa a linha/coluna a ser resolvida e armazena seu endereço no ponteiro line. Inicializa o contador cells_solved com zero, indicando que nenhuma célula foi resolvida ainda:
 ```c++
     SequentialLineSolver(Line &line_ref);
 ```
-
+Função responsável por identificar padrões comuns entre as possibilidades atuais da linha. Primeiro, obtém os índices das células que possuem o mesmo valor em todas as possibilidades válidas utilizando a função getCommonIndexes(). Para cada índice comum encontrado, preenche a célula correspondente com o valor definido na primeira possibilidade e registra essa atualização na pilha result, que é retornada ao final do processo:
 ```c++
     std::stack<Update> resolveCommonPatterns();
 ```
-
+Método que insere uma atualização no solver sequencial. Incrementa o contador cells_solved para indicar que uma célula foi resolvida e empilha o objeto update na estrutura updates para posterior processamento:
 ```c++
     void insertUpdate(Update update);
 ```
