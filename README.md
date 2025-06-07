@@ -114,38 +114,40 @@ Função para acessar, por referência, a célula localizada no índice especifi
 ```
 
 ### Nonogram.h e Nonogram.cpp
+Função para criar um objeto Nonogram vazio utilizando o construtor padrão. Função para criar um objeto Nonogram vazio com alocação de linhas e colunas, conforme os parâmetros de largura (width) e altura (height):
 ```c++
+    Nonogram() = default;
     Nonogram(int width, int height);
 ```
-
+Função para obter uma referência à linha localizada no índice especificado:
 ```c++
     Line &getRow(int index);
 ```
-
+Função para obter uma referência à coluna localizada no índice especificado:
 ```c++
     Line &getColumn(int index);
 ```
-
+Função para obter a largura (número de colunas) do Nonogram:
 ```c++
     int getWidth() const 
 ```
-
+Função para obter a altura (número de linhas) do Nonogram:
 ```c++
     int getHeight()
 ```
-
+Função para acessar, por referência, a linha localizada no índice especificado:
 ```c++
     Line &operator[](int index)
 ```
-
+Função para acessar, por referência constante, a linha localizada no índice especificado:
 ```c++
     const Line &operator[](int index) const
 ```
-
+Função para imprimir a grade do Nonogram no console. Cada linha é impressa em uma nova linha e as células são representadas como '1' (preenchida) ou '0' (vazia):
 ```c++
     void print() const;
 ```
-
+Função para redefinir o estado de todas as células do Nonogram:
 ```c++
     void unsetCells();
 ```
