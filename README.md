@@ -154,56 +154,59 @@ Função para redefinir o estado de todas as células do Nonogram:
 
 ## utils  
 ### NonogramPuzzleFactory.h e NonogramPuzzleFactory.cpp
+Função para criar um objeto Nonogram a partir de uma string contínua que representa o puzzle. A função divide a string em linhas, valida a entrada, cria o Nonogram com as dimensões apropriadas, interpreta as linhas e colunas, reseta o estado das células e retorna o objeto criado:
 ```c++
     static Nonogram fromString(const std::string &input);
 ```
-
+Função para criar um objeto Nonogram a partir de um vetor booleano contínuo que representa o puzzle e o número de colunas. A função divide o vetor em linhas, cria o Nonogram com as dimensões corretas, interpreta as linhas e colunas, reseta o estado das células e retorna o objeto criado:
 ```c++
     static Nonogram fromBool(const std::vector<bool> &input, int cols);
 ```
-
-```c++
-    static void main(std::string task);
-```
-
+Função para gerar múltiplos puzzles do tipo Nonogram para diferentes dimensões especificadas. Para cada dimensão, a função cria uma quantidade definida de jogos únicos que possuem solução válida. Ela verifica a solução usando um solver, salva os puzzles válidos em arquivo e imprime o progresso no console. Caso um puzzle seja insolvable, ele é descartado e contabilizado:
 ```c++
     static void create_games(const std::vector<int> dimensions, int num_games, const std::string filename);
     static void loadGames(std::string filename);
 ```
-
+Função para comparar se dois vetores booleanos são iguais. Retorna true se forem iguais, false caso contrário:
 ```c++
     static bool equalGrids(const std::vector<bool> &oldGrid, const std::vector<bool> &newGrid);
 ```
-
+Função para carregar jogos a partir de um arquivo. Recebe o nome do arquivo como parâmetro e retorna um vetor contendo os dados dos puzzles carregados:
 ```c++
     static std::vector<RawPuzzleData> loadGamesFromFile(const std::string &filename);
 ```
-
+Função para gerar uma grade booleana diferente de qualquer grade presente no vetor fornecido. Recebe como parâmetros o vetor de grades e a dimensão da grade:
 ```c++
     std::vector<bool> static getDifferentGrid(const std::vector<std::vector<bool>> &grid, int dimension);
 ```
-
+Função para escrever uma grade booleana em um arquivo. Recebe a grade, sua dimensão e o nome do arquivo como parâmetros:
 ```c++
     static void writeGridToFile(const std::vector<bool> &grid, int dimension, const std::string &filename);
 ```
-
+Função para dividir uma string contínua que representa um jogo em múltiplas linhas. Retorna um vetor de strings, cada uma correspondendo a uma linha do puzzle:
 ```c++
     static std::vector<std::string> splitLines(const std::string &str);
 ```
-
+Função para dividir um vetor booleano contínuo, que representa um puzzle, em múltiplas linhas. Recebe o vetor de entrada e o comprimento das linhas, retornando um vetor contendo as linhas como vetores booleanos:
 ```c++
     static std::vector<std::vector<bool>> splitLines(const std::vector<bool> &input, int row_length);
 ```
+Função para verificar se as linhas de uma string são válidas, ou seja, se contêm apenas '0' e '1' e se todas as linhas têm o mesmo tamanho. Recebe um vetor de linhas como parâmetro:
 ```c++
     static bool isValidLines(const std::vector<std::string> &lines);
 ```
-
+Função para criar uma linha a partir de uma string que representa os dados da linha:
 ```c++
     static void parseLine(Line &line, std::string &linestr);
+```
+Função para criar uma linha a partir de um vetor booleano que representa os dados da linha:
+```c++
     static void parseLine(Line &line, std::vector<bool> boolLine);
+```
+Função para criar uma linha a partir do estado atual do jogo, usada especialmente para construir as colunas:
+```c++
     static void parseLine(Line &line);
 ```
-
 ### NonogramRun.h e NonogramRun.cpp
 ```c++
     NonogramRun(const RawPuzzleData gameData, bool parallel = false, int nThreads = 0);

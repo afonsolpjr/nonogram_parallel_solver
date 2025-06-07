@@ -15,8 +15,6 @@ public:
     static Nonogram fromString(const std::string &input);
 
     static Nonogram fromBool(const std::vector<bool> &input, int cols);
-
-    static void main(std::string task);
     
     static void create_games(const std::vector<int> dimensions, int num_games, const std::string filename);
     static void loadGames(std::string filename);
