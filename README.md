@@ -45,68 +45,69 @@ Função para obter a quantidade de blocos (dicas) em uma linha. Retorna o núme
 ```c++
     int getSize() const;
 ```
-Função para obter o tamanho da dica em um índice específico. O parâmetro index indica a posição da dica desejada no vetor de blocos.
+Função para obter o tamanho da dica em um índice específico. O parâmetro index indica a posição da dica desejada no vetor de blocos:
 ```c++
     int getHint(int index) const;
 ```
-Função para converter o objeto Hint em uma representação textual. Retorna uma string contendo os tamanhos dos blocos separados por espaço.
+Função para converter o objeto Hint em uma representação textual. Retorna uma string contendo os tamanhos dos blocos separados por espaço:
 ```c++
     std::string toString() const;
 ```
-Função para acessar diretamente o vetor de dicas (tamanhos dos blocos). Retorna uma referência constante ao vetor de inteiros armazenado no objeto.
+Função para acessar diretamente o vetor de dicas (tamanhos dos blocos). Retorna uma referência constante ao vetor de inteiros armazenado no objeto:
 ```c++
     const std::vector<int> &getBlocks() const
 ```
 
 ### Line.h e Line.cpp
+Função para criar uma linha com um determinado comprimento. Caso o parâmetro init seja true, as células da linha são inicializadas. Caso contrário, apenas o espaço é alocado para posterior atribuição:
 ```c++
     Line(int length, bool init = false);
 ```
-
+Função para adicionar uma célula à linha. Recebe um ponteiro para uma estrutura Cell que será incluída no final da linha:
 ```c++
     void addCell(Cell *cell);
 ```
-
+Função para associar uma célula a uma posição específica da linha. Define, no vetor de células, o ponteiro da célula na posição index como sendo o ponteiro fornecido no parâmetro cell:
 ```c++
     void bindCell(int index, Cell *cell);
 ```
-
+Função para adicionar uma dica à linha. O parâmetro block_size representa o tamanho do bloco a ser adicionado:
 ```c++
     void addHint(int block_size);
 ```
-
+Função para retornar a estrutura Hint associada à linha:
 ```c++
     const Hint &getHints()
 ```
-
+Função para obter a quantidade total de dicas da linha:
 ```c++
     int getHintSize() const
 ```
-
+Função para obter a dica localizada no índice especificado da linha:
 ```c++
     int getHint(int index) const;
 ```
-
+Função para obter o comprimento da linha:
 ```c++
     int getLength() const
 ```
-
+Função para definir o estado da célula localizada no índice especificado da linha:
 ```c++
     void setCell(int index);
 ```
-
+Função para bloquear a célula localizada no índice especificado da linha:
 ```c++
     void blockCell(int index);
 ```
-
+Função para obter a representação da linha como uma string. Caso o parâmetro zeros seja true, células vazias são representadas como zeros:
 ```c++
     std::string toString(bool zeros = false) const;
 ```
-
+Função para imprimir a linha no console:
 ```c++
     void print() const;
 ```
-
+Função para acessar, por referência, a célula localizada no índice especificado da linha e função para acessar, por referência constante, a célula localizada no índice especificado da linha:
 ```c++
     Cell &operator[](int index) { return *cells[index]; }
     const Cell &operator[](int index) const { return *cells[index]; }   
