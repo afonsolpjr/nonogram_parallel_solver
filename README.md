@@ -234,100 +234,109 @@ Função para converter um objeto Nonogram em um vetor linear de booleanos. A co
 ```
 
 ### RandomGenerator.h e RandomGenerator.cpp
-
+Função para gerar um objeto Nonogram a partir de uma string aleatória. Cria uma string representando uma grade de rows x cols com caracteres '0' e '1', convertendo-a para um Nonogram por meio da NonogramPuzzleFactory:
 ```c++
     static Nonogram randomFromString(int rows, int cols);
 ```
-
+Função para gerar um objeto Nonogram a partir de um vetor de booleanos aleatórios. Gera um vetor de tamanho rows * cols com valores true ou false, com 60% de chance de ser true, e o converte para um Nonogram utilizando a NonogramPuzzleFactory:
 ```c++
     static Nonogram randomFromBool(int rows, int cols);
 ```
-
+Função para imprimir no terminal uma representação em string de uma grade aleatória de rows x cols, composta por caracteres '0' e '1', com quebras de linha ao final de cada linha da grade:
 ```c++
     static void printRandomString(int rows, int cols);
 ```
-
+Função auxiliar para gerar uma string representando uma grade de rows x cols com valores binários aleatórios ('0' ou '1'). Cada linha é separada por uma quebra de linha ('\n'). A distribuição dos bits é uniforme:
 ```c++
     static std::string generateRandomStringGrid(int rows, int cols);
 ```
-
+Função auxiliar para gerar um vetor de booleanos aleatórios representando uma grade de rows x cols. Cada valor tem 60% de chance de ser true e 40% de ser false, criando uma densidade maior de células preenchidas (true):
 ```c++
     static std::vector<bool> generateRandomBoolGrid(int rows, int cols);
 ```
 ## solvers
 ### BaseSolver.h
+Função construtora para inicializar um objeto BaseSolver com referência a um objeto Nonogram. Inicializa solucionadores de linha e coluna (rowSolvers e columnSolvers) usando o tipo genérico LineSolverType.
+Cada linha e cada coluna do Nonogram é passada como argumento para um novo objeto LineSolverType, e os ponteiros são armazenados nos vetores de solucionadores:
+```c++
+    template <typename LineSolverType>
+    BaseSolver<LineSolverType>::BaseSolver(Nonogram &nonogram_ref)
+```
+Função para verificar se o Nonogram foi completamente resolvido:
 ```c++
     template <typename LineSolverType>
     bool BaseSolver<LineSolverType>::isSolved()
 ```
 
+### NonogramSolver.h e NonogramSolver.cpp
+Função construtora para inicializar um objeto BaseSolver com um Nonogram de referência. Cria vetores de ponteiros para solucionadores de linha e coluna (rowSolvers e columnSolvers), instanciando objetos do tipo LineSolverType para cada linha e coluna do puzzle, com base nas pistas obtidas diretamente do objeto Nonogram:
+```c++
+    NonogramSolver(Nonogram &nonogramref): BaseSolver<SequentialLineSolver>(nonogramref)
+```
+
 ```c++
     template <typename LineSolverType>
-    BaseSolver<LineSolverType>::BaseSolver(Nonogram &nonogram_ref)
+    bool BaseSolver<LineSolverType>::isSolved()
 ```
-
-### NonogramSolver.h e NonogramSolver.cpp
-```c++
-    NonogramSolver(Nonogram &nonogramref): aseSolver<SequentialLineSolver>(nonogramref)
-```
-
+Função para resolver o puzzle Nonogram por meio de iterações sucessivas entre solucionadores de linha e de coluna. Enquanto o puzzle não estiver totalmente resolvido (!isSolved()), cada solver gera e aplica atualizações de padrões comuns, propagando alterações entre linhas e colunas. Se, em uma passada completa, nenhuma mudança for feita, conclui que não é possível avançar e retorna false; caso contrário, retorna true quando todas as linhas estiverem solucionadas:
 ```c++
     bool solve()
 ```
-
+Função para inicializar o solver gerando todas as combinações possíveis de preenchimento para cada linha e coluna, preparando os solucionadores internos (rowSolvers e columnSolvers) antes de iniciar o processo de resolução:
 ```c++
     void init();
 ```
 
 ### ParallelNonogramSolver.h e ParallelNonogramSolver.cpp
+Função construtora para inicializar um ParallelNonogramSolver. Encadeia o construtor de BaseSolver com o Nonogram de referência e armazena a quantidade de threads que serão utilizadas na solução paralela:
 ```c++
     ParallelNonogramSolver(Nonogram &nonogram_ref, int nThreads);
 ```
-
+Função para resolver o puzzle Nonogram em paralelo: cria um pool com nThreads threads, delega a cada uma a execução do método worker, aguarda a conclusão de todas elas com join() e, ao final, devolve o resultado de isSolved() indicando se o puzzle foi inteiramente resolvido:
 ```c++
     bool solve();
 ```
-
+Função para executar, em uma thread, o ciclo principal de resolução paralela: alterna fases de processamento de linhas e colunas chamando processPhase, sincroniza-se com as demais threads por meio de barreiras (completionCheckBarrier) e encerra quando o puzzle estiver completamente resolvido:
 ```c++
     void worker(int id);
 ```
-
+Função para preparar a execução paralela do solver. Cria os jobs iniciais para todas as linhas e colunas, instancia o pool de threads com nThreads, delega a cada thread a execução de init_worker() e aguarda a conclusão de todas as threads com join():
 ```c++
     void init();
 ```
-
+Função worker executada por cada thread do pool. Processa, em paralelo, os jobs de geração de possibilidades primeiro para as linhas e depois para as colunas, e por fim sincroniza todas as threads na barreira de inicialização (init_barrier()):
 ```c++
     void init_worker();
 ```
-
+Função para inserir um trabalho em uma fila de jobs. Recebe um objeto UpdateJob e um identificador booleano isRow. Se isRow for true, insere o trabalho na fila de linhas (rowJobs); caso contrário, insere na fila de colunas (columnJobs):
 ```c++
     void insertUpdateAndJob(UpdateJob update, bool isRow);
 ```
-
+Função para obter um trabalho de uma fila de jobs. O parâmetro booleano isRow indica se o job requerido é de linha (true) ou de coluna (false). Retorna o índice da linha ou coluna a ser processada, ou um valor negativo se não houver jobs disponíveis:
 ```c++
     int getJob(bool isRow);
 ```
-
+Função para realizar uma barreira de sincronização entre threads. Garante que todas as threads tenham concluído a etapa atual antes de prosseguir. Retorna true se o puzzle estiver completamente resolvido; caso contrário, retorna false:
 ```c++
     bool completionCheckBarrier();
 ```
-
+Função para sincronizar a inicialização das threads. A última thread a alcançar essa barreira gera jobs para todas as linhas e colunas, assegurando que cada linha e coluna tenha, ao menos uma vez, suas possibilidades verificadas:
 ```c++
     void init_barrier();
 ```
-
+Função para gerar possibilidades para todas as linhas ou colunas: enquanto existirem jobs na fila correspondente (rowJobs ou columnJobs), obtém o índice da linha/coluna via getJob(isRowInit) e chama generatePossibilities() no solver respectivo para esse índice:
 ```c++
     void init_work(bool isRowInit);
 ```
-
+Função para processar uma fase da resolução (linha ou coluna): repetidamente obtém jobs da fila, executa phaseWork para cada índice, acumulando atualizações em phaseUpdates. Ao fim, registra todas as atualizações coletadas via registerPhaseUpdates:
 ```c++
     void processPhase(std::stack<UpdateJob> &phaseUpdates, bool isRowPhase);
 ```
-
+Função para processar o trabalho em uma linha ou coluna específica: chama updatePossibilities() para atualizar o solver, obtém atualizações parciais com resolveCommonPatterns() e adiciona todas essas atualizações na pilha geral phaseUpdates, ajustando o índice para a linha/coluna atual:
 ```c++
     void phaseWork(int index, std::stack<UpdateJob> &phaseUpdates, bool isRowPhase);
 ```
-
+Função para registrar atualizações da fase atual: enquanto houver atualizações em phaseUpdates, remove cada uma e chama insertUpdateAndJob para inseri-las na estrutura de jobs, protegendo a seção crítica para atualização concorrente dos dados:
 ```c++
     void registerPhaseUpdates(std::stack<UpdateJob> &phaseUpdates, bool isRowPhase);
 ```
