@@ -1,5 +1,4 @@
 #pragma once
-
 #include "linesolvers/SequentialLineSolver.h"
 #include "BaseSolver.h"
 #include <vector>

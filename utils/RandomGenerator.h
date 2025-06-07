@@ -1,9 +1,9 @@
 #pragma once
-
 #include "../src/Nonogram.h"
 #include <vector>
 #include <string>
 #include "NonogramPuzzleFactory.h"
+
 class RandomGenerator
 {
 public:
@@ -13,5 +13,4 @@ public:
 
     static std::string generateRandomStringGrid(int rows, int cols);
     static std::vector<bool> generateRandomBoolGrid(int rows, int cols);
-
 };
