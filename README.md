@@ -31,22 +31,29 @@ Função para obter o estado atual da célula:
 ```
 
 ### Hint.h e Hint.cpp
+Construtor padrão da classe Hint. Inicializa um objeto de dica sem valores definidos.  
+Construtor da classe Hint que inicializa as dicas de uma linha com base em um vetor de inteiros. Cada inteiro representa o tamanho de um bloco contínuo de células preenchidas, e o vetor deve estar ordenado conforme a sequência das dicas na linha.
+```c++
+    Hint() = default;
+    Hint(const std::vector<int> &blocks);
+```
+Função para adicionar uma dica correspondente a uma sequência de blocos. O parâmetro size representa o tamanho do bloco contínuo que será adicionado à lista de dicas da linha ou coluna:
 ```c++
     void addBlock(int size);
 ```
-
+Função para obter a quantidade de blocos (dicas) em uma linha. Retorna o número total de dicas armazenadas:
 ```c++
     int getSize() const;
 ```
-
+Função para obter o tamanho da dica em um índice específico. O parâmetro index indica a posição da dica desejada no vetor de blocos.
 ```c++
     int getHint(int index) const;
 ```
-
+Função para converter o objeto Hint em uma representação textual. Retorna uma string contendo os tamanhos dos blocos separados por espaço.
 ```c++
     std::string toString() const;
 ```
-
+Função para acessar diretamente o vetor de dicas (tamanhos dos blocos). Retorna uma referência constante ao vetor de inteiros armazenado no objeto.
 ```c++
     const std::vector<int> &getBlocks() const
 ```
