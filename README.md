@@ -208,29 +208,31 @@ Função para criar uma linha a partir do estado atual do jogo, usada especialme
     static void parseLine(Line &line);
 ```
 ### NonogramRun.h e NonogramRun.cpp
+Função construtora para inicializar um objeto NonogramRun. Recebe os dados brutos do puzzle, um indicador para execução paralela e o número de threads. Cria internamente um objeto Nonogram a partir dos dados recebidos:
 ```c++
     NonogramRun(const RawPuzzleData gameData, bool parallel = false, int nThreads = 0);
 ```
-
+Função para executar a resolução do puzzle Nonogram. Dependendo da configuração, utiliza um solver paralelo ou sequencial. Mede o tempo gasto na inicialização e na resolução, verifica a correção da solução e imprime estatísticas do processo:
 ```c++
     void run();
 ```
-
+Função para imprimir estatísticas da execução do puzzle. Exibe no terminal o tamanho do jogo, o tempo de inicialização, o tempo de resolução e o tempo total da execução. Informa também se a solução foi considerada correta, com base na verificação feita anteriormente:
 ```c++
     void printStats() const;
 ```
-
+Função para verificar a correção da solução atual do puzzle em relação aos dados originais. Converte o puzzle resolvido em um vetor de booleanos e o compara com o vetor original armazenado em gameData. Se forem equivalentes, define is_correct como verdadeiro e o retorna:
+```c++
+    bool NonogramRun::verifyCorrectness()
+```
+Função estática para verificar a correção de um puzzle resolvido em relação aos dados originais fornecidos como parâmetro. Compara o puzzle convertido em vetor com o vetor original do RawPuzzleData. Retorna true se forem iguais e false caso contrário:
 ```c++
     static bool verifyCorrectness(const RawPuzzleData gameData, const Nonogram &puzzle);
 ```
-
+Função para converter um objeto Nonogram em um vetor linear de booleanos. A conversão percorre o puzzle linha por linha, armazenando true para cada célula marcada como "set". Esse vetor representa a solução do puzzle de forma contínua, sendo útil para comparações:
 ```c++
     static std::vector<bool> puzzleToVector(const Nonogram &puzzle);
 ```
 
-```c++
-    bool verifyCorrectness();
-```
 ### RandomGenerator.h e RandomGenerator.cpp
 
 ```c++
