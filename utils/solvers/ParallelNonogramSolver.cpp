@@ -68,12 +68,12 @@ void ParallelNonogramSolver::worker(int id)
     {
         processPhase(phaseUpdates, true);
 
-        if (completionCheckBarrier())
+        if (completionCheckBarrier(false))
             break;
 
         processPhase(phaseUpdates, false);
 
-        if (completionCheckBarrier())
+        if (completionCheckBarrier(true))
             break;
     }
 }
