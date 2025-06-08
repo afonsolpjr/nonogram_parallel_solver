@@ -25,8 +25,6 @@ std::stack<UpdateJob> ParallelLineSolver::resolveCommonPatterns()
 
 void ParallelLineSolver::insertUpdate(UpdateJob updateJob)
 {
-    std::lock_guard<std::mutex> lock(mutex);
-
     cells_solved++;
     updates.push(updateJob);
 }

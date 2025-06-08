@@ -3,7 +3,6 @@
 #include <vector>
 #include <list>
 #include <stack>
-#include <mutex>
 #include "BaseLineSolver.h"
 
 struct UpdateJob
@@ -19,7 +18,4 @@ public:
 
     std::stack<UpdateJob> resolveCommonPatterns();
     void insertUpdate(UpdateJob updateJob);
-
-private:
-    std::mutex mutex;
 };
