@@ -182,7 +182,7 @@ int ParallelNonogramSolver::getJob(bool isRow)
     return item;
 }
 
-bool ParallelNonogramSolver::completionCheckBarrier()
+bool ParallelNonogramSolver::completionCheckBarrier(bool checkForUniqueness)
 {
 
     std::unique_lock<std::mutex> lock(mutex);
@@ -193,7 +193,7 @@ bool ParallelNonogramSolver::completionCheckBarrier()
         cond.wait(lock);
         return completed;
     }
-    else if (changesMade == 0 || isSolved())
+    else if ((checkForUniqueness && changesMade == 0) || isSolved())
     {
         completed = true;
         cond.notify_all();

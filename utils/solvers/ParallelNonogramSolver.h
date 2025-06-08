@@ -39,7 +39,7 @@ private:
 
     /// @brief Simple barrier for the threads. Also checks for completion.
     /// @return true if puzzle complete, false otherwise.
-    bool completionCheckBarrier();
+    bool completionCheckBarrier(bool checkForUniqueness);
 
     /// @brief Wait for other threads initialization. The last thread create jobs for all rows and collumns, so at least once the rows and collumns have their possibilities checked.
     void init_barrier();
