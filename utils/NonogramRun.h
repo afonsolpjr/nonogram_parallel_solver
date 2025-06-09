@@ -11,18 +11,20 @@ class NonogramRun
     std::chrono::duration<double> init_time;
     std::chrono::duration<double> solve_time;
     bool is_correct = false;
-    bool is_parallel = false;
     int nThreads = 0;
 
 public:
     Nonogram puzzle;
 
-    NonogramRun(const RawPuzzleData gameData, bool parallel = false, int nThreads = 0);
+    NonogramRun(const RawPuzzleData gameData, int nThreads);
 
-    void run();
-    void printStats() const;
+    bool run();
+    void printStats();
     static bool verifyCorrectness(const RawPuzzleData gameData, const Nonogram &puzzle);
 
+    void appendResult(FILE *filePtr);
+
+    const std::string toCSV();
 private:
     static std::vector<bool> puzzleToVector(const Nonogram &puzzle);
     bool verifyCorrectness();

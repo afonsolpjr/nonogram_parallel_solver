@@ -1,16 +1,19 @@
 #include "NonogramRun.h"
 #include <iostream>
 #include <chrono>
+#include <sstream>
+#include <iomanip>
 
-NonogramRun::NonogramRun(const RawPuzzleData gameData, bool parallel, int nThreads) : gameData(gameData), is_parallel(parallel), nThreads(nThreads)
+NonogramRun::NonogramRun(const RawPuzzleData gameData, int nThreads) : gameData(gameData), nThreads(nThreads)
 {
     puzzle = NonogramPuzzleFactory::fromBool(gameData.grid, gameData.dimension);
 }
 
-void NonogramRun::run()
+bool NonogramRun::run()
 {
-    if (is_parallel)
+    if (nThreads==1)
     {
+
         ParallelNonogramSolver solver(puzzle, nThreads);
         auto start = std::chrono::high_resolution_clock::now();
         solver.init();
@@ -20,8 +23,9 @@ void NonogramRun::run()
         solver.solve();
         solve_time = std::chrono::high_resolution_clock::now() - start;
     }
-    else
+    else if (nThreads>1)
     {
+        nThreads=1;
         NonogramSolver solver(puzzle);
         auto start = std::chrono::high_resolution_clock::now();
         solver.init();
@@ -32,11 +36,10 @@ void NonogramRun::run()
         solve_time = std::chrono::high_resolution_clock::now() - start;
     }
 
-    verifyCorrectness();
-    printStats();
+    return verifyCorrectness();
 }
 
-void NonogramRun::printStats() const
+void NonogramRun::printStats()
 {
     printf("Tamanho do Jogo: %dx%d\n", puzzle.getHeight(), puzzle.getWidth());
     std::cout << "Tempo de inicialização: " << init_time.count() << "s\n";
@@ -75,4 +78,22 @@ std::vector<bool> NonogramRun::puzzleToVector(const Nonogram &puzzle)
         }
     }
     return result;
+}
+
+void NonogramRun::appendResult(FILE *filePtr)
+{
+    fputs(toCSV().c_str(),filePtr);
+    fflush(filePtr);
+}
+
+
+const std::string NonogramRun::toCSV()
+{
+    std::ostringstream csvLine;
+    csvLine << gameData.gameId << ","
+            << gameData.dimension << ","
+            << nThreads << ","
+            << std::fixed << std::setprecision(6) << init_time.count() << ","
+            << std::fixed << std::setprecision(6) << solve_time.count() << '\n';
+    return csvLine.str();
 }

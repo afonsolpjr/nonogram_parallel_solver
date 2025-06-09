@@ -8,7 +8,7 @@ std::vector<RawPuzzleData> NonogramPuzzleFactory::loadGamesFromFile(const std::s
     std::vector<RawPuzzleData> games;
     std::ifstream in(filename);
     std::string line;
-
+    int gameCounter = 0;
     while (std::getline(in, line))
     {
         std::istringstream iss(line);
@@ -21,7 +21,7 @@ std::vector<RawPuzzleData> NonogramPuzzleFactory::loadGamesFromFile(const std::s
         std::vector<bool> grid;
         for (char c : gridstr)
             grid.push_back(c == '1');
-        games.push_back({dimension, grid});
+        games.push_back({dimension, ++gameCounter, grid});
     }
     return games;
 }

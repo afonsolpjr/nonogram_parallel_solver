@@ -5,6 +5,7 @@
 struct RawPuzzleData
 {
     int dimension;
+    int gameId;
     std::vector<bool> grid;
 };
 
