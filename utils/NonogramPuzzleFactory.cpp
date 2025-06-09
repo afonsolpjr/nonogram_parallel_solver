@@ -21,7 +21,7 @@ std::vector<RawPuzzleData> NonogramPuzzleFactory::loadGamesFromFile(const std::s
         std::vector<bool> grid;
         for (char c : gridstr)
             grid.push_back(c == '1');
-        games.push_back({dimension, ++gameCounter, grid});
+        games.push_back({dimension, gameCounter++, grid});
     }
     return games;
 }
@@ -45,18 +45,18 @@ void NonogramPuzzleFactory::create_games(const std::vector<int> dimensions, int 
 
             std::vector<bool> grid = getDifferentGrid(grids, dimension);
             Nonogram puzzle = fromBool(grid, dimension);
-            NonogramSolver solver(puzzle);
+            ParallelNonogramSolver solver(puzzle, 4);
             solver.init();
-            if (solver.solve() && NonogramRun::verifyCorrectness({dimension, grid}, puzzle))
+            if (solver.solve() && NonogramRun::verifyCorrectness({dimension,0, grid}, puzzle))
             {
                 grids.push_back(grid);
-                printf("\r %ld\\%d jogos de tamanho %d gerados", grids.size(), num_games, dimension);
+                printf("\r %ld\\%d jogos de tamanho %d gerados. ", grids.size(), num_games, dimension);
                 fflush(stdout);
                 writeGridToFile(grid, dimension, filename);
                 grid.clear();
             }
             else
-                printf(" %d sem solução..", ++unsolvables);
+                printf(" | %d sem solução..", ++unsolvables);
         }
     }
 }

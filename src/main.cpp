@@ -11,14 +11,15 @@ void batchExecution(int timesToRun, int maxThreads, std::string gamesFilename, s
 
     // escreve nome das colunas
     //  game number : dimension : nThreads : initTime : resolutionTime
-    fputs("\"gameNumber\",\"dimension\",\"nThreads\",\"initTime\",\"resolutionTime\"\n", fp);
+    fputs("\"gameId\",\"dimension\",\"nThreads\",\"initTime\",\"resolutionTime\"\n", fp);
 
     printf("\n%ld Jogos a serem executados em até %d threads, %d vezes.",
            gamesData.size(), maxThreads, timesToRun);
 
-    for (int i = 0; i < timesToRun; i++)
+    for (int nThreads = 1; nThreads <= maxThreads; nThreads++)
     {
-        for (int nThreads = 1; nThreads <= maxThreads; nThreads++)
+
+        for (int i = 0; i < timesToRun; i++)
         {
             for (int gameId = 0; gameId < gamesData.size(); gameId++)
             {
