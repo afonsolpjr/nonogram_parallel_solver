@@ -213,15 +213,18 @@ def plot_eff_chart(which=all):
         # print("Printando:",
         #     "\n\t Eixo x:{}".format(list(n_threads).sort()),
         #     "\n\t Eixo y = {}".format(speed_ups[n_dim][key]))
+        efficiencies = []
+        for i in range(len(n_threads)):
+            efficiencies.append(speed_ups[n_dim][key][i]/n_threads[i])
 
-        plt.scatter(sorted(list(n_threads)),speed_ups[n_dim][key],
+        plt.scatter(sorted(list(n_threads)),efficiencies,
                     marker='.')
-        plt.plot(sorted(list(n_threads)),speed_ups[n_dim][key],
+        plt.plot(sorted(list(n_threads)),efficiencies,
                     label="n={}".format(n_dim),
                     linestyle='dotted')
         
         plt.xlabel("p (Nº de threads)")
-        plt.ylabel("S(n,p)")
+        plt.ylabel("E(n,p)")
         plt.title("Eficiencia E(n,p) do {}, por número de threads".format(texto))
         plt.legend()
 
@@ -235,6 +238,7 @@ tempos = ["all","init","resolution"]
 for tempo in tempos:
     plot_speedup_chart(tempo)
     mean_times_chart(tempo)
+    plot_eff_chart(tempo)
 
     
     
