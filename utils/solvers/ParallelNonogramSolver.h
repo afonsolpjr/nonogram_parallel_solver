@@ -37,7 +37,8 @@ private:
     /// @return Index of a line to process, or a negative value if there is no jobs.
     int getJob(bool isRow);
 
-    /// @brief Simple barrier for the threads. Also checks for completion.
+    /// @brief Simple barrier for the threads. Also checks for completion and estagnation of the problem
+    /// @param checkForUniqueness check for solver estagnation if true.
     /// @return true if puzzle complete, false otherwise.
     bool completionCheckBarrier(bool checkForUniqueness);
 

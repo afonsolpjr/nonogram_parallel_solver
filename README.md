@@ -1,5 +1,7 @@
 # Nonogram Parallel Solver
-O projeto é dividido entre duas pastas, src e utils, contendo cabeçalhos de classes c++ e suas implementações. Todos os jogos estão salvos em Games.txt e o projeto pode ser compilado ao executar compilar.sh que utiliza o arquivo CMakeLists.txt.  
+O projeto é dividido entre duas pastas, src e utils, contendo cabeçalhos de classes c++ e suas implementações. Todos os jogos estão salvos em "Games.txt" e o projeto pode ser compilado ao executar compilar.sh, que utiliza o arquivo CMakeLists.txt.
+
+Para executar o programa (realizar 10 análises de cada combinação jogos/n_threads dos jogos em Games.txt), execute "build/nonogram_solver" com o numero máximo de threads a serem testadas como o primeiro argumento do program. Os resultados de cada execução serão salvos em um arquivo "data.csv".
 
 ## src
 

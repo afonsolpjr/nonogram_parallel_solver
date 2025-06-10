@@ -40,23 +40,16 @@ void batchExecution(int timesToRun, int maxThreads, std::string gamesFilename, s
     fclose(fp);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     std::cout << "Hello, Nonogram Solver!" << std::endl;
-    // std::vector<RawPuzzleData> gamesData = NonogramPuzzleFactory::loadGamesFromFile("Games.txt");
-
-    // int gameId = 0;
-
-    // std::cin >> gameId;
-
-    // auto sequential = new NonogramRun(gamesData[gameId]);
-    // auto parallel = new NonogramRun(gamesData[gameId], true, 8);
-
-    // std::cout << "Running game number: " << gameId << std::endl;
-    // sequential->run();
-    // // sequential->puzzle.print();
-    // parallel->run();
-
-    batchExecution(10, 4, "Games.txt", "data.csv");
+    
+    if(argc <2)
+    {
+        printf("\n Insira o número maximo de threads a serem testadas como argumento do programa\n");
+        exit(1);
+    }
+    
+    batchExecution(10, atoi(argv[1]), "Games.txt", "data.csv");
     return 0;
 }
