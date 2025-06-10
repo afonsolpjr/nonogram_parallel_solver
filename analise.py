@@ -27,6 +27,7 @@ with open('data.csv', newline='') as csvfile:
 
 dimensions = sorted(set(row['dimension'] for row in data))
 n_threads = sorted(set(row['nThreads'] for row in data))
+
 def mean_times_chart(which="all"):
     # Agrupar dados por dimensão e número de threads
     grouped_data = {}
@@ -193,7 +194,42 @@ def plot_speedup_chart(which = "all"):
     plt.savefig("graficos/speedup_{}.png".format(which))
     plt.close()
     
-            
+def plot_eff_chart(which=all):
+    speed_ups = calc_speedups()
+
+    match which:
+        case "all":
+            key = 'avgTotal'
+            texto = "tempo total"
+        case "init":
+            key = 'avgInit'
+            texto = "tempo de inicialização"
+        case "resolution":
+            key = 'avgResolution'
+            texto = "tempo de resolução"
+    
+    for n_dim in dimensions:
+       
+        # print("Printando:",
+        #     "\n\t Eixo x:{}".format(list(n_threads).sort()),
+        #     "\n\t Eixo y = {}".format(speed_ups[n_dim][key]))
+
+        plt.scatter(sorted(list(n_threads)),speed_ups[n_dim][key],
+                    marker='.')
+        plt.plot(sorted(list(n_threads)),speed_ups[n_dim][key],
+                    label="n={}".format(n_dim),
+                    linestyle='dotted')
+        
+        plt.xlabel("p (Nº de threads)")
+        plt.ylabel("S(n,p)")
+        plt.title("Eficiencia E(n,p) do {}, por número de threads".format(texto))
+        plt.legend()
+
+    # plt.show()
+
+    plt.savefig("graficos/efficiency_{}.png".format(which))
+    plt.close()
+
 
 tempos = ["all","init","resolution"]
 for tempo in tempos:
