@@ -106,6 +106,7 @@ def mean_times_chart(which="all"):
     else:
         filename = 'graficos/avg_times_resolution.png'
     plt.savefig(filename)
+    plt.close()
 
 def calc_speedups():
     #objetivo: aceleracao media por dimensao
