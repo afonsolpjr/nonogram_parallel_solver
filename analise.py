@@ -2,122 +2,92 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+# Leitura e processamento dos dados
 data = []
-# Lê o arquivo CSV original
 with open('data.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        # Converte os dados para os tipos corretos
         row['gameNumber'] = int(row['gameNumber'])
         row['dimension'] = int(row['dimension'])
         row['nThreads'] = int(row['nThreads'])
         row['initTime'] = float(row['initTime'])
         row['resolutionTime'] = float(row['resolutionTime'])
-    
         data.append(row)
 
-# Calcula as médias para cada jogo
+dimensions = sorted(set(row['dimension'] for row in data))
+n_threads = sorted(set(row['nThreads'] for row in data))
 
-dimensions = set(row['dimension'] for row in data)
-n_threads = set(row['nThreads'] for row in data)
-game_ids = set(row['gameNumber'] for row in data)
-game_data_averages = []
+def mean_times_chart():
 
-for game_id in game_ids:
-    #todo jogo foi executado varias vezes com o mesmo numero de threads
-    for n_thr in n_threads:
-        repetitions = [row for row in data if row['gameNumber']==game_id and row['nThreads']==n_thr]
-        avgInitTime = sum(exec['initTime'] for exec in repetitions)/len(repetitions)
-        avgResolutionTime = sum(exec['resolutionTime'] for exec in repetitions)/len(repetitions)
+    # Agrupar dados por dimensão e número de threads
+    grouped_data = {}
+    for dim in dimensions:
+        grouped_data[dim] = {}
+        for thr in n_threads:
+            entries = [row for row in data if row['dimension'] == dim and row['nThreads'] == thr]
+            if entries:
+                avg_init = sum(e['initTime'] for e in entries) / len(entries)
+                avg_resolution = sum(e['resolutionTime'] for e in entries) / len(entries)
+                grouped_data[dim][thr] = {
+                    'avgInitTime': avg_init,
+                    'avgResolutionTime': avg_resolution,
+                    'avgTotalTime': avg_init + avg_resolution
+                }
 
-        game_data_averages.append({
-            'gameId': game_id,
-            'dimension': repetitions[0]['dimension'],
-            'nThreads': n_thr,
-            'avgInitTime': avgInitTime,
-            'avgResolutionTime': avgResolutionTime
-        })
+    # Configurações do gráfico
+    bar_width = 0.4
+    colors = {'init': '#1f77b4', 'resolution': '#ff7f0e'}
 
-    
-# agora tirando média por dimensoes e n_threads
+    # Criar uma figura com subplots para cada dimensão
+    fig, axes = plt.subplots(
+        nrows=len(dimensions), 
+        figsize=(10, 4 * len(dimensions)),
+        squeeze=False
+    )
+    axes = axes.flatten()
 
-dimension_averages = []
-
-for dimension in dimensions:
-    for n_thr in n_threads:
-
-        games = [row for row in game_data_averages if row['dimension']==dimension and row['nThreads']==n_thr]
-
-        avgInitTime = sum(exec['avgInitTime'] for exec in games)/len(games)
-        avgResolutionTime = sum(exec['avgResolutionTime'] for exec in games)/len(games)
-
-        dimension_averages.append({
-            'dimension': dimension,
-            'nThreads': n_thr,
-            'avgInitTime': avgInitTime,
-            'avgResolutionTime': avgResolutionTime
-        })
-
-
-# import matplotlib.pyplot as plt
-# import numpy as np
-
-# species = ("Adelie", "Chinstrap", "Gentoo")
-# penguin_means = {
-#     'Bill Depth': (18.35, 18.43, 14.98),
-#     'Bill Length': (38.79, 48.83, 47.50),
-#     'Flipper Length': (189.95, 195.82, 217.19),
-# }
-
-# x = np.arange(len(species))  # the label locations
-# width = 0.25  # the width of the bars
-# multiplier = 0
-
-# fig, ax = plt.subplots(layout='constrained')
-
-# for attribute, measurement in penguin_means.items():
-#     offset = width * multiplier
-#     rects = ax.bar(x + offset, measurement, width, label=attribute)
-#     ax.bar_label(rects, padding=3)
-#     multiplier += 1
-
-# # Add some text for labels, title and custom x-axis tick labels, etc.
-# ax.set_ylabel('Length (mm)')
-# ax.set_title('Penguin attributes by species')
-# ax.set_xticks(x + width, species)
-# ax.legend(loc='upper left', ncols=3)
-# ax.set_ylim(0, 250)
-
-# plt.show()
-
-#Calcular medias gerais de inicializacao e execucao para cada (dimensao,n_threads)
-
-data = {}
-for dimension in dimensions:
-    init_means = []
-    exec_means = []
-    dim_data = [row for row in dimension_averages if row['dimension']==dimension]
-    print(dim_data)
-    for dim_thr_data in dim_data:
-        print(dim_thr_data)
-        init_means.append(dim_thr_data['avgInitTime'])
-        exec_means.append(dim_thr_data['avgResolutionTime'])
-    
-    print(init_means,exec_means)
-    data[dimension]= {
-        "Mean Initialization Time ": init_means,
-        "Mean Resolution Time": exec_means,
-    }
-    print(data[dimension])
-    fig, ax = plt.subplots()
-    bottom = np.zeros(len(n_threads))
-    width=0.5
-    for data_label, means in data[dimension].items():
-        p = ax.bar(list(n_threads), means, width, label=data_label, bottom=bottom)
-        bottom += means
-
-    ax.set_title("Mean execution times for dimension = {}".format(dimension))
-    # ax.legend(loc="upper right")
-
-    plt.show()
+    for i, dim in enumerate(dimensions):
+        ax = axes[i]
+        init_times = []
+        resolution_times = []
+        threads = []
         
+        for thr in n_threads:
+            if thr in grouped_data[dim]:
+                init_times.append(grouped_data[dim][thr]['avgInitTime'])
+                resolution_times.append(grouped_data[dim][thr]['avgResolutionTime'])
+                threads.append(str(thr))
+
+        x = np.arange(len(threads))
+        
+        ax.bar(x, init_times, bar_width, color=colors['init'], label='Inicialização')
+        ax.bar(x, resolution_times, bar_width, bottom=init_times, color=colors['resolution'], label='Resolução')
+
+        # Remover eixos redundantes
+        if i < len(dimensions) - 1:
+            ax.set_xlabel('')
+            ax.set_xticklabels([])
+        else:
+            ax.set_xlabel('Número de Threads')
+
+        ax.set_ylabel('Tempo (s)' if i % 2 == 0 else '')  # Mostrar em eixos alternados
+
+        # Adicionar anotação ao invés de título
+        ax.text(0.95, 0.95, f'Dimensão {dim}', transform=ax.transAxes,
+                fontsize=12, verticalalignment='top', horizontalalignment='right',
+                bbox=dict(boxstyle='round,pad=0.2', facecolor='lightgray', alpha=0.5))
+
+        # Só mostrar legenda no primeiro subplot
+        if i == 0:
+            ax.legend(loc='upper left')
+        else:
+            ax.legend().remove()
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(threads)
+
+    plt.tight_layout()
+    plt.show()
+
+mean_times_chart()
