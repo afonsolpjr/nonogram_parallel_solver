@@ -19,7 +19,7 @@ bool NonogramSolver::solve()
             columnUpdates = rowSolvers[i]->resolveCommonPatterns();
             changesMade += columnUpdates.size();
             // At first, the index value on updates indicate the column.
-            //  But it must indicate the index on the column.
+            //  But when registered on column solver, it must indicate the index on the column.
             while (!columnUpdates.empty())
             {
                 auto update = columnUpdates.top();
@@ -37,7 +37,7 @@ bool NonogramSolver::solve()
             rowUpdates = columnSolvers[i]->resolveCommonPatterns();
             changesMade += rowUpdates.size();
             // At first, the index value on updates indicate the row.
-            //  But it must indicate the index on the row.
+            //  But when registered on row solver, it must indicate the index on the row.
             while (!rowUpdates.empty())
             {
                 auto update = rowUpdates.top();
