@@ -3,6 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+#Gráficos para criar:
+# 1. Gráfico de barras com o tempo médio de inicialização e resolução por dimensão e número de threads.
+# 2. Gráfico de barras com o tempo médio de resolução por dimensão e número de threads.
+# 3. Gráfico de barras com o tempo médio de inicialização por dimensão e número de threads.
+# 4. Aceleração média por dimensão e número de threads. (calcular aceleração média por jogo, depois média dessas aceleracoes por dimensao)
+    # 4.1 colocar todas as dimensoes em um grafico só
+# 5. Mesma coisa da aceleração, mas com eficiencia.
+
+
+
 # Leitura e processamento dos dados
 data = []
 with open('data.csv', newline='') as csvfile:
@@ -18,7 +28,7 @@ with open('data.csv', newline='') as csvfile:
 dimensions = sorted(set(row['dimension'] for row in data))
 n_threads = sorted(set(row['nThreads'] for row in data))
 
-def mean_times_chart():
+def mean_times_chart(which="all"):
 
     # Agrupar dados por dimensão e número de threads
     grouped_data = {}
@@ -61,8 +71,16 @@ def mean_times_chart():
 
         x = np.arange(len(threads))
         
-        ax.bar(x, init_times, bar_width, color=colors['init'], label='Inicialização')
-        ax.bar(x, resolution_times, bar_width, bottom=init_times, color=colors['resolution'], label='Resolução')
+        if(which == "resolution"):
+            ax.bar(x, resolution_times, bar_width, color=colors['resolution'], label='Resolução')
+        else:
+            ax.bar(x, init_times, bar_width, color=colors['init'], label='Inicialização')
+            if(which == "all"):
+                ax.bar(x, resolution_times, bar_width, bottom=init_times, color=colors['resolution'], label='Resolução')
+
+
+        #somente resolucao 
+
 
         # Remover eixos redundantes
         if i < len(dimensions) - 1:
@@ -89,5 +107,6 @@ def mean_times_chart():
 
     plt.tight_layout()
     plt.show()
+
 
 mean_times_chart()
