@@ -388,11 +388,7 @@ Função recursiva que gera todas as combinações possíveis de tamanho k a par
     template <typename UpdateType>
     std::vector<std::vector<int>> generateCombinations(std::vector<int> n, int k);
 ```
-Função para criar uma linha (vetor booleano) de comprimento length com um bloco contínuo de células preenchidas (true) começando no índice start e ocupando block_size células. Preenche true do índice start até start + block_size - 1. As demais posições são preenchidas com false. Retorna o vetor booleano representando o bloco:
-```c++
-    template <typename UpdateType>
-    std::vector<bool> composeBlockLine(int length, int block_size, int start);
-```
+
 Função para eliminar possibilidades inválidas com base em uma atualização no índice index da linha. Percorre todas as possibilidades existentes. Remove qualquer possibilidade cuja célula no índice index não coincida com o status esperado (true ou false). Mantém apenas as possibilidades compatíveis com as atualizações atuais:
 ```c++
     template <typename UpdateType>

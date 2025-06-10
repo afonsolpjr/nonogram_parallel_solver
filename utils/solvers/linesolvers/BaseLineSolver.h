@@ -15,21 +15,53 @@ public:
     int cells_solved;
     std::stack<UpdateType> updates;
 
+    /// @brief Check updates registered within the object.
     void updatePossibilities();
+
+    /// @brief Insert a update within the Line Solver.
+    /// @param update 
     virtual void insertUpdate(UpdateType update) = 0;
+
+    /// @brief Check for unanimity on cells values across the possibilities.
+    /// @return stack of updates containing information of which collumn needs reassessing on the next phase.
     std::stack<UpdateType> resolveCommonPatterns();
 
-    void print_possibility(const std::vector<bool> &possibility);
-    void print_possibilities();
+  
+    /// @brief Check if line is solved.
+    /// @return True if line is completed.
     bool isSolved();
+
+    /// @brief Generate all posibilities based on line length and the hints.
     void generatePossibilities();
 
+    /* Debug functions */
+    void print_possibility(const std::vector<bool> &possibility);
+    void print_possibilities();
+
 protected:
+    /// @brief Generate all combinations of k elements of the vector n 
+    /// @param n vector 
+    /// @param k number of elements to choose
+    /// @return vector of k-sized combinations of the elements of n
     std::vector<std::vector<int>> generateCombinations(std::vector<int> n, int k);
-    std::vector<bool> composeBlockLine(int length, int block_size, int start);
+
+    /// @brief Eliminate possibilities where the index of the cell has a specific status.
+    /// @param index index of the cell 
+    /// @param status status to exclude
     void eliminatePossibilities(int index, bool status);
+
+    /// @brief Mark a cell as painted of blocked.
+    /// @param index index of the cell
+    /// @param cell_value value to mark on the game
     void play(int index, bool cell_value);
+
+    /// @brief Get all indexes which have value commonalities across the possibilities.
+    /// @return list of the indexes
     std::list<int> getCommonIndexes();
+
+    /// @brief Transforms a simple combination representation into a possibility of the line.
+    /// @param combination the combination created by the generateCombinations function
+    /// \see generateCombinations
     void combinationToPossibility(std::vector<int> combination);
 };
 
@@ -90,20 +122,6 @@ void BaseLineSolver<UpdateType>::generatePossibilities()
     {
         combinationToPossibility(combination);
     }
-}
-
-template <typename UpdateType>
-std::vector<bool> BaseLineSolver<UpdateType>::composeBlockLine(int length, int block_size, int start)
-{
-    std::vector<bool> combination(length, false);
-    for (int i = start; i < start + block_size; ++i)
-    {
-        if (i < length)
-        {
-            combination[i] = true;
-        }
-    }
-    return combination;
 }
 
 template <typename UpdateType>

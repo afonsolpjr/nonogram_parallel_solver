@@ -14,8 +14,12 @@ public:
     std::vector<LineSolverType *> columnSolvers;
 
     BaseSolver(Nonogram &nonogram_ref);
-
+    
+    /// @brief Initializate a solver, generating possibilities across the line solvers.
     virtual void init() = 0;
+
+    /// @brief Solve the puzzle
+    /// @return true if solved, false otherwise
     virtual bool solve() = 0;
     bool isSolved();
 };
