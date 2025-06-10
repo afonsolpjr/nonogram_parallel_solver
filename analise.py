@@ -194,7 +194,7 @@ def plot_speedup_chart(which = "all"):
     plt.savefig("graficos/speedup_{}.png".format(which))
     plt.close()
     
-def plot_eff_chart(which=all):
+def plot_eff_chart(which="all"):
     speed_ups = calc_speedups()
 
     match which:
