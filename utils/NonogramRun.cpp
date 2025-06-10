@@ -11,7 +11,7 @@ NonogramRun::NonogramRun(const RawPuzzleData gameData, int nThreads) : gameData(
 
 bool NonogramRun::run()
 {
-    if (nThreads==1)
+    if (nThreads>1)
     {
 
         ParallelNonogramSolver solver(puzzle, nThreads);
@@ -23,7 +23,7 @@ bool NonogramRun::run()
         solver.solve();
         solve_time = std::chrono::high_resolution_clock::now() - start;
     }
-    else if (nThreads>1)
+    else if (nThreads==1)
     {
         nThreads=1;
         NonogramSolver solver(puzzle);
