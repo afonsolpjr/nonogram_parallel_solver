@@ -18,7 +18,7 @@ data = []
 with open('data.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        row['gameNumber'] = int(row['gameNumber'])
+        row['gameId'] = int(row['gameId'])
         row['dimension'] = int(row['dimension'])
         row['nThreads'] = int(row['nThreads'])
         row['initTime'] = float(row['initTime'])
@@ -121,7 +121,7 @@ def calc_speedups():
             'avgTotal': []
         }
         #calcular aceleracao media por jogo
-        game_ids = set(row['gameNumber'] for row in data if row['dimension']==dimension)
+        game_ids = set(row['gameId'] for row in data if row['dimension']==dimension)
 
 
         game_sequential_data = {}
@@ -133,7 +133,7 @@ def calc_speedups():
 
             for game_id in game_ids:
                 
-                entries = [row for row in data if row['gameNumber']==game_id and row['nThreads']==n_thread]
+                entries = [row for row in data if row['gameId']==game_id and row['nThreads']==n_thread]
                 avgInitTime = sum(exec['initTime'] for exec in entries)/len(entries)
                 avgResolutionTime = sum(exec['resolutionTime'] for exec in entries)/len(entries)
                 # print("Tempo medio de execs init e res para o jogo {} = {} {}".format(game_id,avgInitTime,avgResolutionTime))

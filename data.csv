@@ -1,4 +1,4 @@
-"gameNumber","dimension","nThreads","initTime","resolutionTime"
+"gameId","dimension","nThreads","initTime","resolutionTime"
 0,5,1,0.000104,0.000055
 1,5,1,0.000074,0.000042
 2,5,1,0.000090,0.000036
